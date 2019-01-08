@@ -57,26 +57,26 @@ func TestWrapper(t *testing.T) {
 	}
 
 	t.Run("Tes Register Model Error", func(t *testing.T) {
-		_, errNew := RegisterModel(initRouter, srv, myElastic, nil, &GroupConfiguration{}, &repo.QueryProps{})
+		_, errNew := RegisterModel(initRouter, srv, myElastic, nil, &GroupConfiguration{}, &repo.QueryProps{}, nil)
 		assert.Error(t, errNew)
 	})
 
 	t.Run("Tes Register Model non group", func(t *testing.T) {
-		_, errNew := RegisterModel(initRouter, srv, myElastic, myModel, &GroupConfiguration{}, &repo.QueryProps{})
+		_, errNew := RegisterModel(initRouter, srv, myElastic, myModel, &GroupConfiguration{}, &repo.QueryProps{}, nil)
 		assert.NoError(t, errNew)
 	})
 
 	t.Run("Tes register wrong host DB", func(t *testing.T) {
 		srvNew := core.NewServiceConnection(
 			config.GetByName("db.driver"),
-			"192.100.99.99",
+			config.GetByName("db.host"),
 			port,
 			config.GetByName("db.user"),
-			config.GetByName("db.password"),
+			"alibaba",
 			config.GetByName("db.name"),
 		)
 
-		_, errNew := RegisterModel(initRouter, srvNew, myElastic, myModel, &GroupConfiguration{}, &repo.QueryProps{})
+		_, errNew := RegisterModel(initRouter, srvNew, myElastic, myModel, &GroupConfiguration{}, &repo.QueryProps{}, nil)
 		assert.Error(t, errNew)
 
 	})
@@ -95,6 +95,7 @@ func TestWrapper(t *testing.T) {
 				Preload:       []string{"Comments"},
 				PreloadStatus: true,
 			},
+			[]string{"create"},
 		)
 
 		assert.NoError(t, errNew)

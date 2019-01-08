@@ -31,6 +31,7 @@ func RegisterModel(
 	model interface{},
 	grp *GroupConfiguration,
 	qyp *repo.QueryProps,
+	filterAction []string,
 ) (*gorm.DB, error) {
 
 	if model == nil {
@@ -51,6 +52,11 @@ func RegisterModel(
 	rp := repo.NewMasterRepository(model, db, elastic)
 
 	handl := repo.NewServiceRouteHandler(r, rp, qyp)
+
+	if filterAction != nil && len(filterAction) > 0 {
+		handl.RegisterAllHandler()
+		handl.ModifiedListHandler(filterAction)
+	}
 
 	if grp.Name != "" {
 		handl.PathRegisterWithMiddleware(grp.Name, grp.Middleware)

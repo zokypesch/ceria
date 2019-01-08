@@ -52,19 +52,17 @@ func (routes *RouteHandler) PathRegisterWithMiddleware(groupName string, middle 
 	grp := routes.rt.Group(groupName)
 	grp.Use(middle)
 	{
-		routes.rt.GET(routes.repo.Tablename, routes.GetAllHandler)
-		routes.rt.POST(routes.repo.Tablename, routes.CreateHandler)
-		routes.rt.PUT(routes.repo.Tablename+"/:id", routes.UpdateHandler)
-		routes.rt.DELETE(routes.repo.Tablename+"/:id", routes.DeleteHandler)
-		// additional
-		routes.rt.POST(routes.repo.Tablename+"/find", routes.GetDataByfieldHandler)
-		routes.rt.POST(routes.repo.Tablename+"/bulkcreate", routes.BulkCreateHandler)
-		routes.rt.POST(routes.repo.Tablename+"/bulkdelete", routes.BulkDeleteHandler)
+		for _, v := range routes.listHandler {
+			routes.RegisterURLFromGroup(grp, v["type"].(string), v["path"].(string), v["fn"].(func(ctx *gin.Context)))
+		}
 	}
 }
 
 // RegisterURL for registration url by path and function
 func (routes *RouteHandler) RegisterURL(typ string, path string, fn func(ctx *gin.Context)) {
+	if path == "" || fn == nil {
+		return
+	}
 	switch typ {
 	case "GET":
 		routes.rt.GET(path, fn)
@@ -74,6 +72,23 @@ func (routes *RouteHandler) RegisterURL(typ string, path string, fn func(ctx *gi
 		routes.rt.PUT(path, fn)
 	case "DELETE":
 		routes.rt.DELETE(path, fn)
+	}
+}
+
+//RegisterURLFromGroup for register from group
+func (routes *RouteHandler) RegisterURLFromGroup(grp *gin.RouterGroup, typ string, path string, fn func(ctx *gin.Context)) {
+	if path == "" || fn == nil {
+		return
+	}
+	switch typ {
+	case "GET":
+		grp.GET(path, fn)
+	case "POST":
+		grp.POST(path, fn)
+	case "PUT":
+		grp.PUT(path, fn)
+	case "DELETE":
+		grp.DELETE(path, fn)
 	}
 }
 

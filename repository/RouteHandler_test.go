@@ -417,7 +417,7 @@ func TestWithMiddleWare(t *testing.T) {
 
 		newFn := fn.(func(ctx *gin.Context))
 
-		handl.RegisterURL("WHAT??", "/str", newFn)
+		handl.RegisterURL("WHAT??", "/fbs", newFn)
 	})
 
 	t.Run("tes register url with real type", func(t *testing.T) {
@@ -432,6 +432,40 @@ func TestWithMiddleWare(t *testing.T) {
 		newFn := fn.(func(ctx *gin.Context))
 
 		handl.RegisterURL("GET", "/str", newFn)
+	})
+
+	t.Run("tes register url with real type", func(t *testing.T) {
+		repo := NewMasterRepository(&myStruct, db, withElastic)
+		handl := NewServiceRouteHandler(r, repo, &QueryProps{})
+
+		handl.RegisterAllHandler()
+
+		randomHdlr := handl.listHandler[0]
+		fn := randomHdlr["fn"]
+
+		newFn := fn.(func(ctx *gin.Context))
+
+		handl.RegisterURL("GET", "", newFn)
+	})
+
+	t.Run("tes register url with group", func(t *testing.T) {
+		repo := NewMasterRepository(&myStruct, db, withElastic)
+		handl := NewServiceRouteHandler(r, repo, &QueryProps{})
+
+		handl.RegisterAllHandler()
+
+		randomHdlr := handl.listHandler[0]
+		fn := randomHdlr["fn"]
+
+		newFn := fn.(func(ctx *gin.Context))
+
+		grp := handl.rt.Group("test123")
+		grp.Use()
+		{
+			handl.RegisterURLFromGroup(grp, "GET", "/strgroup", newFn)
+			handl.RegisterURLFromGroup(grp, "WHATS??", "", newFn)
+		}
+
 	})
 
 }
