@@ -1,0 +1,23 @@
+db:
+  STATUS: true
+  PORT: 5432
+  DRIVER: postgres
+  HOST: localhost
+  USER: local
+  PASSWORD: local
+  NAME: local
+elastic:
+  STATUS: false
+  HOST: 127.0.0.1
+  PORT: 9200
+redis:
+  STATUS: true
+  HOST: 127.0.0.1
+  PORT: 6379
+rabbitmq:
+  STATUS: true
+  HOST: 127.0.0.1
+  HOSTNAME: amqp
+  PORT: 5672
+  USER: rabbitmq
+  PASSWORD: rabbitmq
