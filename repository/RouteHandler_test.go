@@ -378,6 +378,62 @@ func TestWithMiddleWare(t *testing.T) {
 		fmt.Println("Hii iam example middleware")
 		c.Next()
 	})
+
+	t.Run("tes register all handler", func(t *testing.T) {
+		repo := NewMasterRepository(&myStruct, db, withElastic)
+		handl := NewServiceRouteHandler(r, repo, &QueryProps{})
+
+		list := handl.RegisterAllHandler()
+		assert.NotEmpty(t, list)
+	})
+
+	t.Run("tes modified nil params ignore", func(t *testing.T) {
+		repo := NewMasterRepository(&myStruct, db, withElastic)
+		handl := NewServiceRouteHandler(r, repo, &QueryProps{})
+
+		err := handl.ModifiedListHandler(nil)
+		assert.Error(t, err)
+	})
+
+	t.Run("tes modified success params ignore", func(t *testing.T) {
+		repo := NewMasterRepository(&myStruct, db, withElastic)
+		handl := NewServiceRouteHandler(r, repo, &QueryProps{})
+
+		handl.RegisterAllHandler()
+		err := handl.ModifiedListHandler([]string{"getall", "create", "update"})
+
+		assert.Len(t, handl.listHandler, 4)
+		assert.NoError(t, err)
+	})
+
+	t.Run("tes register url with worng type", func(t *testing.T) {
+		repo := NewMasterRepository(&myStruct, db, withElastic)
+		handl := NewServiceRouteHandler(r, repo, &QueryProps{})
+
+		handl.RegisterAllHandler()
+
+		randomHdlr := handl.listHandler[0]
+		fn := randomHdlr["fn"]
+
+		newFn := fn.(func(ctx *gin.Context))
+
+		handl.RegisterURL("WHAT??", "/str", newFn)
+	})
+
+	t.Run("tes register url with real type", func(t *testing.T) {
+		repo := NewMasterRepository(&myStruct, db, withElastic)
+		handl := NewServiceRouteHandler(r, repo, &QueryProps{})
+
+		handl.RegisterAllHandler()
+
+		randomHdlr := handl.listHandler[0]
+		fn := randomHdlr["fn"]
+
+		newFn := fn.(func(ctx *gin.Context))
+
+		handl.RegisterURL("GET", "/str", newFn)
+	})
+
 }
 
 // example api test

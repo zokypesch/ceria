@@ -10,12 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandlerFunc handler function
+type HandlerFunc func(ctx *gin.Context)
+
 // RouteHandler struct for handler gin
 type RouteHandler struct {
-	rt       *gin.Engine
-	repo     *MasterRepository
-	httpUtil *hlp.HTTPHelper
-	qryProps *QueryProps
+	rt          *gin.Engine
+	repo        *MasterRepository
+	httpUtil    *hlp.HTTPHelper
+	qryProps    *QueryProps
+	listHandler []map[string]interface{}
 }
 
 // RouteHAndlerInterface for interfacing routeHandler
@@ -35,14 +39,15 @@ func NewServiceRouteHandler(gn *gin.Engine, rp *MasterRepository, qp *QueryProps
 
 // PathRegister for register path
 func (routes *RouteHandler) PathRegister() {
-	routes.rt.GET(routes.repo.Tablename, routes.GetAllHandler)
-	routes.rt.POST(routes.repo.Tablename, routes.CreateHandler)
-	routes.rt.PUT(routes.repo.Tablename+"/:id", routes.UpdateHandler)
-	routes.rt.DELETE(routes.repo.Tablename+"/:id", routes.DeleteHandler)
-	// additional
-	routes.rt.POST(routes.repo.Tablename+"/find", routes.GetDataByfieldHandler)
-	routes.rt.POST(routes.repo.Tablename+"/bulkcreate", routes.BulkCreateHandler)
-	routes.rt.POST(routes.repo.Tablename+"/bulkdelete", routes.BulkDeleteHandler)
+	if len(routes.listHandler) == 0 {
+		routes.RegisterAllHandler()
+	}
+
+	fmt.Println("Hello its me !!!")
+
+	for _, v := range routes.listHandler {
+		routes.RegisterURL(v["type"].(string), v["path"].(string), v["fn"].(func(ctx *gin.Context)))
+	}
 }
 
 // PathRegisterWithMiddleware for register path
@@ -59,6 +64,58 @@ func (routes *RouteHandler) PathRegisterWithMiddleware(groupName string, middle 
 		routes.rt.POST(routes.repo.Tablename+"/bulkcreate", routes.BulkCreateHandler)
 		routes.rt.POST(routes.repo.Tablename+"/bulkdelete", routes.BulkDeleteHandler)
 	}
+}
+
+// RegisterURL for registration url by path and function
+func (routes *RouteHandler) RegisterURL(typ string, path string, fn func(ctx *gin.Context)) {
+	switch typ {
+	case "GET":
+		routes.rt.GET(path, fn)
+	case "POST":
+		routes.rt.POST(path, fn)
+	case "PUT":
+		routes.rt.PUT(path, fn)
+	case "DELETE":
+		routes.rt.DELETE(path, fn)
+	}
+}
+
+// ModifiedListHandler for get list handler active
+func (routes *RouteHandler) ModifiedListHandler(params []string) error {
+	if params == nil || len(params) == 0 {
+		return fmt.Errorf("Failed to modified list handler")
+	}
+
+	utilGeneral := util.GeneralUtilService()
+
+	for k, v := range routes.listHandler {
+		exist, _ := utilGeneral.InArray(v["name"], params)
+		if exist {
+			routes.listHandler[k] = routes.listHandler[len(routes.listHandler)-1] // Copy last element to index i
+			routes.listHandler[len(routes.listHandler)-1] = nil                   // Erase last element (write zero value)
+			routes.listHandler = routes.listHandler[:len(routes.listHandler)-1]
+		}
+	}
+
+	return nil
+}
+
+// RegisterAllHandler for get full list handler
+func (routes *RouteHandler) RegisterAllHandler() []map[string]interface{} {
+	var newHdlr []map[string]interface{}
+
+	newHdlr = []map[string]interface{}{
+		map[string]interface{}{"name": "getall", "fn": routes.GetAllHandler, "type": "GET", "path": routes.repo.Tablename},
+		map[string]interface{}{"name": "create", "fn": routes.CreateHandler, "type": "POST", "path": routes.repo.Tablename},
+		map[string]interface{}{"name": "update", "fn": routes.UpdateHandler, "type": "PUT", "path": routes.repo.Tablename + "/:id"},
+		map[string]interface{}{"name": "delete", "fn": routes.DeleteHandler, "type": "DELETE", "path": routes.repo.Tablename + "/:id"},
+		map[string]interface{}{"name": "find", "fn": routes.GetDataByfieldHandler, "type": "POST", "path": routes.repo.Tablename + "/find"},
+		map[string]interface{}{"name": "bulkcreate", "fn": routes.BulkCreateHandler, "type": "POST", "path": routes.repo.Tablename + "/bulkcreate"},
+		map[string]interface{}{"name": "bulkdelete", "fn": routes.BulkDeleteHandler, "type": "POST", "path": routes.repo.Tablename + "/bulkdelete"},
+	}
+
+	routes.listHandler = newHdlr
+	return newHdlr
 }
 
 // GetAllHandler for function Handler get

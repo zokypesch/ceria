@@ -99,8 +99,7 @@ func (repo *MasterRepository) GetAllFromStruct(props *QueryProps) ([]map[string]
 
 	if props.WithPagination {
 		strI.SetDefaultValueStruct(props)
-
-		res = repo.Conn.Where(props.Condition).Limit(props.Limit).Offset(props.Offset).Find(str)
+		res = newDB.Where(props.Condition).Limit(props.Limit).Offset(props.Offset).Find(str)
 	} else {
 		res = newDB.Find(str)
 	}

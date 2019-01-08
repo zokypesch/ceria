@@ -69,7 +69,7 @@ func TestWrapper(t *testing.T) {
 	t.Run("Tes register wrong host DB", func(t *testing.T) {
 		srvNew := core.NewServiceConnection(
 			config.GetByName("db.driver"),
-			"192.168.0.1",
+			"192.100.99.99",
 			port,
 			config.GetByName("db.user"),
 			config.GetByName("db.password"),

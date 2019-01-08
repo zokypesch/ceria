@@ -7,7 +7,7 @@ db:
   PASSWORD: local
   NAME: local
 elastic:
-  STATUS: false
+  STATUS: true
   HOST: 127.0.0.1
   PORT: 9200
 redis:
