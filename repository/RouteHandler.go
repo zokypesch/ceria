@@ -99,16 +99,15 @@ func (routes *RouteHandler) ModifiedListHandler(params []string) error {
 	}
 
 	utilGeneral := util.GeneralUtilService()
+	var newListHandler []map[string]interface{}
 
-	for k, v := range routes.listHandler {
-		exist, _ := utilGeneral.InArray(v["name"], params)
-		if exist {
-			routes.listHandler[k] = routes.listHandler[len(routes.listHandler)-1] // Copy last element to index i
-			routes.listHandler[len(routes.listHandler)-1] = nil                   // Erase last element (write zero value)
-			routes.listHandler = routes.listHandler[:len(routes.listHandler)-1]
+	for _, v := range routes.listHandler {
+		exist, _ := utilGeneral.InArray(v["name"].(string), params)
+		if !exist {
+			newListHandler = append(newListHandler, v)
 		}
 	}
-
+	routes.listHandler = newListHandler
 	return nil
 }
 
