@@ -42,9 +42,6 @@ func (routes *RouteHandler) PathRegister() {
 	if len(routes.listHandler) == 0 {
 		routes.RegisterAllHandler()
 	}
-
-	fmt.Println("Hello its me !!!")
-
 	for _, v := range routes.listHandler {
 		routes.RegisterURL(v["type"].(string), v["path"].(string), v["fn"].(func(ctx *gin.Context)))
 	}
