@@ -51,6 +51,9 @@ func (routes *RouteHandler) PathRegister() {
 // PathRegisterWithMiddleware for register path
 func (routes *RouteHandler) PathRegisterWithMiddleware(groupName string, middle func(c *gin.Context)) {
 	grp := routes.rt.Group(groupName)
+	if len(routes.listHandler) == 0 {
+		routes.RegisterAllHandler()
+	}
 	grp.Use(middle)
 	{
 		for _, v := range routes.listHandler {

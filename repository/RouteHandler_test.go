@@ -128,7 +128,7 @@ func TestRouteHandler(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Len(t, responseGetAll, 6)
-		fmt.Println(responseGetAll)
+
 		assert.True(t, responseGetAll["status"].(bool))
 		assert.Len(t, responseGetAll["data"], 3)
 	})

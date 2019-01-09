@@ -356,8 +356,6 @@ func (repo *MasterRepository) Delete(condition map[string]interface{}) error {
 			// 	errSlice = append(errSlice, errElastic)
 			// }
 
-			// fmt.Println(errElastic.Error() != "elastic: Error 404 (Not Found)")
-
 		}
 	}
 
@@ -452,13 +450,15 @@ func (repo *MasterRepository) ParseConditionToWhere(params []map[string]interfac
 			continue
 		}
 		operator = repo.CheckOperator(opera.(string))
-		res.WriteString(field.(string) + " " + operator + " ? OR ")
 
 		vInt, okInt := value.(int)
 		if okInt {
+			res.WriteString(field.(string) + "= ? OR ")
 			args = append(args, vInt)
 			continue
 		}
+
+		res.WriteString(field.(string) + " " + operator + " ? OR ")
 
 		if operator == "=" {
 			args = append(args, value.(string))

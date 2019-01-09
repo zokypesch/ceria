@@ -139,7 +139,6 @@ func TestMasterRepository(t *testing.T) {
 
 		// res, _ := repo.GetAllFromStruct2(&bindUser, page)
 		res, _ := repo.GetAllFromStruct(page)
-		fmt.Println(res)
 		assert.Len(t, res, 1)
 	})
 
