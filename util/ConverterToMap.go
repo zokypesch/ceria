@@ -218,7 +218,7 @@ func (util *ConverterToMap) ConvertStructToSingeMap(fieldList interface{}) map[s
 func (util *ConverterToMap) RefValueToInterface(v reflect.Value) interface{} {
 	var res interface{}
 
-	if v.Kind() == reflect.Invalid || (v == reflect.Zero(v.Type()).Interface() && v.Type().Name() == "") {
+	if v.Kind() == reflect.Invalid || (v.Interface() == reflect.Zero(v.Type()).Interface() && v.Type().Name() == "") {
 		return res
 	}
 
