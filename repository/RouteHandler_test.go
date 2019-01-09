@@ -123,11 +123,12 @@ func TestRouteHandler(t *testing.T) {
 		response = nil
 		var responseGetAll map[string]interface{}
 
-		w := newHelper.TestAPI(r, "GET", "/examples?page=1&limit=10&where=title:welcome;author_id:1:LIKE", nil, nil)
+		w := newHelper.TestAPI(r, "GET", "/examples?page=1&limit=10&where=title:welcome|author_id:1:LIKE", nil, nil)
 		json.Unmarshal([]byte(w.Body.String()), &responseGetAll)
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Len(t, responseGetAll, 6)
+		fmt.Println(responseGetAll)
 		assert.True(t, responseGetAll["status"].(bool))
 		assert.Len(t, responseGetAll["data"], 3)
 	})
@@ -136,7 +137,7 @@ func TestRouteHandler(t *testing.T) {
 		response = nil
 		var responseGetAll map[string]interface{}
 
-		w := newHelper.TestAPI(r, "GET", "/examples?page=1&limit=10&where=title:welcome:EQUAL;author_id:1:LIKE", nil, nil)
+		w := newHelper.TestAPI(r, "GET", "/examples?page=1&limit=10&where=title:welcome:EQUAL|author_id:1:LIKE", nil, nil)
 		json.Unmarshal([]byte(w.Body.String()), &responseGetAll)
 
 		assert.Equal(t, http.StatusOK, w.Code)
@@ -149,7 +150,7 @@ func TestRouteHandler(t *testing.T) {
 		response = nil
 		var responseGetAll map[string]interface{}
 
-		w := newHelper.TestAPI(r, "GET", "/examples?page=1&limit=10&where=title:=SQLBLABLA:EQUAL;futher:=?PSQL:LIKE", nil, nil)
+		w := newHelper.TestAPI(r, "GET", "/examples?page=1&limit=10&where=title:=SQLBLABLA:EQUAL|futher:=?PSQL:LIKE", nil, nil)
 		json.Unmarshal([]byte(w.Body.String()), &responseGetAll)
 
 		assert.Equal(t, http.StatusOK, w.Code)

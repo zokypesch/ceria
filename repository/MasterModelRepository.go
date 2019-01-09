@@ -446,11 +446,23 @@ func (repo *MasterRepository) ParseConditionToWhere(params []map[string]interfac
 		field, okF := v["field"]
 		value, okV := v["value"]
 		opera, okO := v["operator"]
+		okAll := okF && okV && okO && field != ""
 
-		if okF && okV && okO && field != "" {
-			operator = repo.CheckOperator(opera.(string))
+		if !okAll {
+			continue
+		}
+		operator = repo.CheckOperator(opera.(string))
+		res.WriteString(field.(string) + " " + operator + " ? OR ")
 
-			res.WriteString(field.(string) + " " + operator + " ? OR ")
+		vInt, okInt := value.(int)
+		if okInt {
+			args = append(args, vInt)
+			continue
+		}
+
+		if operator == "=" {
+			args = append(args, value.(string))
+		} else if operator == "LIKE" {
 			args = append(args, "%"+value.(string)+"%")
 		}
 

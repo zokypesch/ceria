@@ -134,6 +134,7 @@ func (routes *RouteHandler) RegisterAllHandler() []map[string]interface{} {
 func (routes *RouteHandler) GetAllHandler(ctx *gin.Context) {
 	var page, limit int = 0, 0
 	var condition []map[string]interface{}
+	var valueParams interface{}
 
 	if routes.qryProps.WithPagination {
 
@@ -141,7 +142,7 @@ func (routes *RouteHandler) GetAllHandler(ctx *gin.Context) {
 		limitSetting := ctx.DefaultQuery("limit", "30")
 		conditionSetting := ctx.Query("where")
 
-		argsWhere := strings.Split(conditionSetting, ";")
+		argsWhere := strings.Split(conditionSetting, "|")
 
 		for _, vArgs := range argsWhere {
 			argsField := strings.Split(vArgs, ":")
@@ -149,7 +150,12 @@ func (routes *RouteHandler) GetAllHandler(ctx *gin.Context) {
 				continue
 			}
 
-			condition = append(condition, map[string]interface{}{"field": argsField[0], "value": argsField[1], "operator": argsField[2]})
+			valueParams = argsField[1]
+			if vInt, okInt := strconv.Atoi(argsField[1]); okInt == nil {
+				valueParams = vInt
+			}
+
+			condition = append(condition, map[string]interface{}{"field": argsField[0], "value": valueParams, "operator": argsField[2]})
 		}
 
 		pages, errPage := strconv.Atoi(pageSetting)

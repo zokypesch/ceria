@@ -109,6 +109,6 @@ check your elastic search
 curl -i -H "Accept: application/json"  -X POST http://localhost:9200/examples/_search -d '{"author": "admin"}'
 
 for query using expression like
-curl -H "Accept: application/json" -X GET http://localhost:9090/articles?page=1&limit=30&where=title:welcome:EQUAL;author_id:1:LIKE
+curl -H "Accept: application/json" -X GET http://localhost:9090/articles?page=1&limit=30&where=title:welcome:EQUAL|author_id:1:LIKE
 ```
 # Happy coding guys :)
