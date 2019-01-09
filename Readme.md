@@ -83,27 +83,27 @@ curl -H "Accept: application/json" -X GET http://localhost:9090/articles?page=1&
 
 curl -H "Accept: application/json" -X DELETE http://localhost:9090/articles/1
 
-curl -i -H "Accept: application/json"  -X POST http://localhost:9200/articles -d \
+curl -i -H "Accept: application/json"  -X POST http://localhost:9090/articles -d \
 '{"title": "hello welcome to ceria", "tag": "#Ceriaworkspace", "body": "lorem ipsum lorem ipsum", "Author": {"fullname": "Ceria Lover"}}'
 
-curl -i -H "Accept: application/json"  -X POST http://localhost:9200/articles -d \
+curl -i -H "Accept: application/json"  -X POST http://localhost:9090/articles -d \
 '{"title": "hello welcome to ceria", "tag": "#Ceriaworkspace", "body": "lorem ipsum lorem ipsum", "author_id": 1}'
 
-curl -i -H "Accept: application/json"  -X PUT http://localhost:9200/articles/1 -d \
+curl -i -H "Accept: application/json"  -X PUT http://localhost:9090/articles/1 -d \
 '{"data": {"title": "iam in ceria"}}'
 
-curl -i -H "Accept: application/json"  -X POST http://localhost:9200/articles/bulkcreate -d \
+curl -i -H "Accept: application/json"  -X POST http://localhost:9090/articles/bulkcreate -d \
 '[{"title": "hello welcome to ceria", "tag": "#Ceriaworkspace", "body": "lorem ipsum lorem ipsum", "author_id": 1}]'
 
-curl -i -H "Accept: application/json"  -X POST http://localhost:9200/articles/find -d \
+curl -i -H "Accept: application/json"  -X POST http://localhost:9090/articles/find -d \
 '{"condition": {"author": "admin"}}'
 
 Login to get JWT
-curl -i -H "Accept: application/json"  -X POST http://localhost:9200/login -d \
+curl -i -H "Accept: application/json"  -X POST http://localhost:9090/login -d \
 '{"username": "admin", "password": "admin"}'
 
 get token and accept to barrier
-curl -i -H "Authorization: Bearer <your token>"  -X GET http://localhost:9200/auth/comments 
+curl -i -H "Authorization: Bearer <your token>"  -X GET http://localhost:9090/auth/comments 
 
 check your elastic search
 curl -i -H "Accept: application/json"  -X POST http://localhost:9200/examples/_search -d '{"author": "admin"}'
