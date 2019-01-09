@@ -169,17 +169,26 @@ func TestConvertToMap(t *testing.T) {
 		Non Keys `ceria:"ignore_elastic"`
 	}
 
-	keysIgnoreElastic := &KeysExampleIgnore{
+	keysIgnoreElastic := KeysExampleIgnore{
 		Non: Keys{
 			name: "triadi",
 			age:  "40",
 		},
 	}
-	resultSetStr := util.SetFieldNullByTag(keysIgnoreElastic)
-
+	resultSetStr := util.SetFieldNullByTag(&keysIgnoreElastic)
 	valStrAfterSet := reflect.ValueOf(resultSetStr).Elem()
-
 	fieldToTest := valStrAfterSet.FieldByName("non")
-
 	assert.Empty(t, fieldToTest)
+
+	// Non pointer
+	keysIgnoreElasticNon := KeysExampleIgnore{
+		Non: Keys{
+			name: "triadi",
+			age:  "40",
+		},
+	}
+	resultSetStrNon := util.SetFieldNullByTag(keysIgnoreElasticNon)
+	valStrAfterSetNon := reflect.ValueOf(resultSetStrNon)
+	fieldToTestNon := valStrAfterSetNon.FieldByName("non")
+	assert.Empty(t, fieldToTestNon)
 }
