@@ -300,3 +300,47 @@ func (util *ConverterToMap) RebuildToSlice(inter interface{}) interface{} {
 
 	return x.Interface() // return as interface
 }
+
+// SetFieldNullByTag function for set struct field to PTR
+func (util *ConverterToMap) SetFieldNullByTag(inter interface{}) interface{} {
+	var res interface{}
+
+	typ := reflect.TypeOf(inter).Kind()
+
+	if typ != reflect.Struct && typ != reflect.Ptr {
+		return res
+	}
+
+	var vl reflect.Value
+	var prop reflect.Type
+
+	switch typ {
+	case reflect.Ptr:
+		vl = reflect.ValueOf(inter).Elem()
+		prop = reflect.TypeOf(inter).Elem()
+	case reflect.Struct:
+		vl = reflect.ValueOf(inter)
+		prop = reflect.TypeOf(inter)
+	}
+
+	// initialize new struct
+
+	for i := 0; i < vl.NumField(); i++ {
+		field := vl.Field(i)
+		vProp, _ := prop.FieldByName(vl.Type().Field(i).Name)
+
+		tag, ok := vProp.Tag.Lookup("ceria")
+
+		if field.CanSet() && ok && tag == "ignore_elastic" {
+			// reflect.Indirect(field) result indirect is not pointer but existing value
+			// reflect.New(reflect.TypeOf(field)) result is pointer
+			// reflect.New(field.Type()).Elem() result is normal ->
+			// because struct is pointer and need to elem() to get original value
+			newStruct := reflect.New(field.Type()).Elem()
+			field.Set(newStruct)
+		}
+
+	}
+
+	return vl.Addr().Interface()
+}

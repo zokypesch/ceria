@@ -82,26 +82,26 @@ func TestConvertToMap(t *testing.T) {
 
 	// check struct with array and non array
 	type KeysParent struct {
-		non Keys
-		arr []Keys
-		str []string
-		mp  map[string]string
+		Non Keys
+		Arr []Keys
+		Str []string
+		Mp  map[string]string
 	}
 
 	testStruct := KeysParent{
-		non: Keys{
+		Non: Keys{
 			name: "triadi",
 			age:  "40",
 		},
-		arr: []Keys{
+		Arr: []Keys{
 			Keys{name: "udin", age: "40"},
 			Keys{name: "paijo", age: "70"},
 		},
-		str: []string{
+		Str: []string{
 			"udin",
 			"paijo",
 		},
-		mp: map[string]string{
+		Mp: map[string]string{
 			"title": "hello",
 		},
 	}
@@ -163,4 +163,23 @@ func TestConvertToMap(t *testing.T) {
 
 	assert.NotNil(t, makeItSlice)
 	// assert.True(t, )
+
+	// Test with ignore elastic
+	type KeysExampleIgnore struct {
+		Non Keys `ceria:"ignore_elastic"`
+	}
+
+	keysIgnoreElastic := &KeysExampleIgnore{
+		Non: Keys{
+			name: "triadi",
+			age:  "40",
+		},
+	}
+	resultSetStr := util.SetFieldNullByTag(keysIgnoreElastic)
+
+	valStrAfterSet := reflect.ValueOf(resultSetStr).Elem()
+
+	fieldToTest := valStrAfterSet.FieldByName("non")
+
+	assert.Empty(t, fieldToTest)
 }
