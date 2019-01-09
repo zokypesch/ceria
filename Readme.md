@@ -1,12 +1,12 @@
-# Lazy developer use this !!!
+# Always WaSting time
 
-# Beta Version 1.0.0
+# Beta Version 0.1.0
 
 full example <a href="https://github.com/zokypesch/example-ceria">here</a> with docker-compose for running environment
 
 ![Screenshot](ceria_diagram.png)
 
-How long did it take to finish this from scratch ???
+How long did it take to finish this from scratch ??? 3 days ??? 2 days ?? 1 days ?? 5 hours ???
 
 ![Screenshot](ERD.png)
 
