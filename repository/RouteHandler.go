@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	hlp "github.com/zokypesch/ceria/helper"
 	util "github.com/zokypesch/ceria/util"
@@ -132,11 +133,24 @@ func (routes *RouteHandler) RegisterAllHandler() []map[string]interface{} {
 // GetAllHandler for function Handler get
 func (routes *RouteHandler) GetAllHandler(ctx *gin.Context) {
 	var page, limit int = 0, 0
+	var condition []map[string]interface{}
 
 	if routes.qryProps.WithPagination {
 
 		pageSetting := ctx.DefaultQuery("page", "1")
 		limitSetting := ctx.DefaultQuery("limit", "30")
+		conditionSetting := ctx.Query("where")
+
+		argsWhere := strings.Split(conditionSetting, ";")
+
+		for _, vArgs := range argsWhere {
+			argsField := strings.Split(vArgs, ":")
+			if len(argsField) < 3 {
+				continue
+			}
+
+			condition = append(condition, map[string]interface{}{"field": argsField[0], "value": argsField[1], "operator": argsField[2]})
+		}
 
 		pages, errPage := strconv.Atoi(pageSetting)
 		limits, errLimit := strconv.Atoi(limitSetting)
@@ -152,6 +166,7 @@ func (routes *RouteHandler) GetAllHandler(ctx *gin.Context) {
 		routes.qryProps.WithPagination = true
 		routes.qryProps.Limit = limit
 		routes.qryProps.Offset = (page - 1) * limit
+		routes.qryProps.Condition = condition
 	}
 	data, err := routes.repo.GetAllFromStruct(routes.qryProps)
 
@@ -231,7 +246,7 @@ func (routes *RouteHandler) DeleteHandler(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	if _, err := strconv.Atoi(id); err != nil {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed to update", "params must a valid number")
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed to delete data", "params must a valid number")
 		return
 	}
 
@@ -254,13 +269,13 @@ func (routes *RouteHandler) BulkCreateHandler(ctx *gin.Context) {
 	errGin := ctx.ShouldBindJSON(str)
 
 	if errGin != nil {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed update data", errGin.Error())
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed bulk create data", errGin.Error())
 		return
 	}
 	_, err := routes.repo.BulkCreate(str)
 
 	if len(err) > 0 {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed update data", err[0].Error())
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed bulk create data", err[0].Error())
 		return
 	}
 
@@ -279,18 +294,18 @@ func (routes *RouteHandler) BulkDeleteHandler(ctx *gin.Context) {
 
 	errGin := ctx.ShouldBindJSON(&params)
 	if errGin != nil {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed update data", errGin.Error())
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed bulk delete data", errGin.Error())
 		return
 	}
 
 	if len(params.Data) == 0 {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed update data", fmt.Errorf("your data length 0").Error())
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed bulk delete data", fmt.Errorf("your data length 0").Error())
 		return
 	}
 
 	err := routes.repo.BulkDelete(params.Data)
 	if len(err) > 0 {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed update data", err[0].Error())
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed bulk delete data", err[0].Error())
 		return
 	}
 
@@ -309,19 +324,19 @@ func (routes *RouteHandler) GetDataByfieldHandler(ctx *gin.Context) {
 
 	errGin := ctx.ShouldBindJSON(&params)
 	if errGin != nil {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed update data", errGin.Error())
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed find data", errGin.Error())
 		return
 	}
 
 	if len(params.Condition) == 0 {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed update data", fmt.Errorf("your data length 0").Error())
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed find data", fmt.Errorf("your data length 0").Error())
 		return
 	}
 
 	data, err := routes.repo.GetDataByfield(params.Condition)
 
 	if err != nil {
-		routes.httpUtil.EchoResponseBadRequest(ctx, "failed update data", err.Error())
+		routes.httpUtil.EchoResponseBadRequest(ctx, "failed find data", err.Error())
 		return
 	}
 

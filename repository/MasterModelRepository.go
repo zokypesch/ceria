@@ -18,7 +18,7 @@ type QueryProps struct {
 	WithPagination bool
 	Offset         int `default:"0"`
 	Limit          int `default:"-1"`
-	Condition      map[string]interface{}
+	Condition      []map[string]interface{}
 	PreloadStatus  bool
 	Preload        []string
 }
@@ -99,7 +99,9 @@ func (repo *MasterRepository) GetAllFromStruct(props *QueryProps) ([]map[string]
 
 	if props.WithPagination {
 		strI.SetDefaultValueStruct(props)
-		res = newDB.Where(props.Condition).Limit(props.Limit).Offset(props.Offset).Find(str)
+		fieldSearch, valueSearch := repo.ParseConditionToWhere(props.Condition)
+
+		res = newDB.Where(fieldSearch, valueSearch...).Limit(props.Limit).Offset(props.Offset).Find(str)
 	} else {
 		res = newDB.Find(str)
 	}
@@ -426,4 +428,54 @@ func (repo *MasterRepository) PreloadSetup(db *gorm.DB, params []string) *gorm.D
 		newDB = newDB.Preload(v)
 	}
 	return newDB
+}
+
+// ParseConditionToWhere using for convert map to query where
+func (repo *MasterRepository) ParseConditionToWhere(params []map[string]interface{}) (string, []interface{}) {
+	var res strings.Builder
+	var finalRes string
+	var operator string
+	var args []interface{}
+
+	if len(params) == 0 {
+		return res.String(), nil
+	}
+
+	for _, v := range params {
+
+		field, okF := v["field"]
+		value, okV := v["value"]
+		opera, okO := v["operator"]
+
+		if okF && okV && okO && field != "" {
+			operator = repo.CheckOperator(opera.(string))
+
+			res.WriteString(field.(string) + " " + operator + " ? OR ")
+			args = append(args, "%"+value.(string)+"%")
+		}
+
+	}
+
+	if len(res.String()) > 0 {
+		finalRes = res.String()[0 : len(res.String())-4]
+	} else {
+		finalRes = res.String()
+	}
+
+	return finalRes, args
+}
+
+// CheckOperator for check operator
+func (repo *MasterRepository) CheckOperator(operator string) string {
+	var res string
+
+	switch strings.ToUpper(operator) {
+	case "EQUAL":
+		res = "="
+	case "LIKE":
+		res = "LIKE"
+	default:
+		res = "LIKE"
+	}
+	return res
 }

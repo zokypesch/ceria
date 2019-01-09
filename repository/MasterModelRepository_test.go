@@ -115,8 +115,8 @@ func TestMasterRepository(t *testing.T) {
 			WithPagination: true,
 			Offset:         0,
 			Limit:          10,
-			Condition: map[string]interface{}{
-				"age": "30",
+			Condition: []map[string]interface{}{
+				map[string]interface{}{"value": "ajoi", "field": "name", "operator": "LIKE"},
 			},
 			PreloadStatus: true,
 			Preload: []string{
@@ -155,6 +155,21 @@ func TestMasterRepository(t *testing.T) {
 		page := &QueryProps{WithPagination: true}
 
 		// res, _ := repo.GetAllFromStruct(&bindUser, page)
+		res, _ := repo.GetAllFromStruct(page)
+
+		assert.Len(t, res, 2)
+	})
+
+	t.Run("Test Get All using where failed setting", func(t *testing.T) {
+		commonReply := []map[string]interface{}{
+			{"name": "FirstLast", "age": "30"},
+			{"name": "Ajoi", "age": "75"},
+		}
+		mocket.Catcher.Reset().NewMock().WithQuery(`SELECT * FROM "users"`).WithReply(commonReply)
+		page := &QueryProps{WithPagination: true,
+			Condition: []map[string]interface{}{
+				map[string]interface{}{"name": "Ajo", "age": "30"},
+			}}
 		res, _ := repo.GetAllFromStruct(page)
 
 		assert.Len(t, res, 2)
@@ -606,4 +621,64 @@ func TestPreload(t *testing.T) {
 
 	dbNew := repo.PreloadSetup(db, []string{"Credits"})
 	assert.NotEmpty(t, dbNew)
+}
+
+func TestParseCondition(t *testing.T) {
+	db := core.GetTestConnection()
+	repo := NewMasterRepository(&newuser{}, db, &ElasticProperties{})
+	t.Run("Nil return when pass the empty map", func(t *testing.T) {
+		data := []map[string]interface{}{}
+
+		res, args := repo.ParseConditionToWhere(data)
+		assert.Empty(t, res)
+		assert.Nil(t, args)
+	})
+
+	t.Run("Nil return when pass the not exisiting field in map", func(t *testing.T) {
+		data := []map[string]interface{}{
+			map[string]interface{}{"field": "age", "value": "30"},
+		}
+
+		res, args := repo.ParseConditionToWhere(data)
+		assert.Empty(t, res)
+		assert.Nil(t, args)
+	})
+
+	t.Run("expected return when pass the wrong operator field in map", func(t *testing.T) {
+		data := []map[string]interface{}{
+			map[string]interface{}{"field": "age", "value": "30", "operator": "WHAT???"},
+		}
+
+		res, args := repo.ParseConditionToWhere(data)
+		assert.NotEmpty(t, res)
+		assert.NotNil(t, args)
+	})
+
+	t.Run("expected return when pass the right", func(t *testing.T) {
+		data := []map[string]interface{}{
+			map[string]interface{}{"field": "age", "value": "30", "operator": "LIKE"},
+			map[string]interface{}{"field": "name", "value": "udin", "operator": "EQUAL"},
+		}
+
+		res, args := repo.ParseConditionToWhere(data)
+		assert.NotEmpty(t, res)
+		assert.NotNil(t, args)
+	})
+
+	t.Run("expected return when pass the one record not valid", func(t *testing.T) {
+		data := []map[string]interface{}{
+			map[string]interface{}{"field": "age", "value": "30", "operator": "LIKE"},
+			map[string]interface{}{"field": "name", "operator": "EQUAL"},
+		}
+
+		res, args := repo.ParseConditionToWhere(data)
+		assert.NotEmpty(t, res)
+		assert.NotNil(t, args)
+	})
+
+	t.Run("Check operator function", func(t *testing.T) {
+		assert.NotEmpty(t, repo.CheckOperator("WHAT ??"))
+		assert.NotEmpty(t, repo.CheckOperator("equal"))
+		assert.NotEmpty(t, repo.CheckOperator("LIKE"))
+	})
 }
