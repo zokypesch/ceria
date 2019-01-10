@@ -177,7 +177,20 @@ func (util *ConverterToMap) ConvertStructToSingeMap(fieldList interface{}) map[s
 			// if ok := fieldValue.CanInterface(); ok {
 			// newValue = fieldValue.Interface()
 			// }
-			res[fieldName] = util.RefValueToInterface(fieldValue)
+			refValueMap := util.RefValueToInterface(fieldValue)
+
+			if fieldName == "Model" && reflect.TypeOf(refValueMap).Kind() == reflect.Map {
+				mapValueRef := reflect.ValueOf(refValueMap)
+
+				for _, eOfMap := range mapValueRef.MapKeys() {
+					vOfMap := mapValueRef.MapIndex(eOfMap)
+					res[eOfMap.String()] = util.ConvertDataToString(vOfMap)
+				}
+
+				continue
+			}
+			res[fieldName] = refValueMap
+
 		case reflect.Slice:
 			newSlice := make([]interface{}, fieldValue.Len())
 
@@ -331,7 +344,7 @@ func (util *ConverterToMap) SetFieldNullByTag(inter interface{}) interface{} {
 
 		tag, ok := vProp.Tag.Lookup("ceria")
 
-		if field.CanSet() && ok && tag == "ignore_elastic" {
+		if field.CanSet() && ok && tag == "ignoreStructField" {
 			// reflect.Indirect(field) result indirect is not pointer but existing value
 			// reflect.New(reflect.TypeOf(field)) result is pointer
 			// reflect.New(field.Type()).Elem() result is normal ->

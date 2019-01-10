@@ -166,7 +166,7 @@ func TestConvertToMap(t *testing.T) {
 
 	// Test with ignore elastic
 	type KeysExampleIgnore struct {
-		Non Keys `ceria:"ignore_elastic"`
+		Non Keys `ceria:"ignoreStructField"`
 	}
 
 	keysIgnoreElastic := KeysExampleIgnore{

@@ -306,23 +306,6 @@ func TestRouteHandler(t *testing.T) {
 	t.Run("Check Bulk Delete Handler", func(t *testing.T) {
 		response = nil
 
-		// insert first
-		jsonParams := []Example{
-			Example{Model: gorm.Model{ID: 1}, Title: "titl 1", Author: "triadi"},
-			Example{Model: gorm.Model{ID: 2}, Title: "titl 2", Author: "triadi"},
-			Example{Model: gorm.Model{ID: 3}, Title: "titl 3", Author: "triadi"},
-		}
-		jsonValue, _ := json.Marshal(jsonParams)
-
-		w := newHelper.TestAPI(r, "POST", "/examples/bulkcreate", jsonValue, nil)
-		json.Unmarshal([]byte(w.Body.String()), &response)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.True(t, response["status"].(bool))
-
-		// bulk delete then
-		response = nil
-
 		jsonParams2 := map[string]interface{}{
 			"data": []map[string]interface{}{
 				map[string]interface{}{"id": 1},

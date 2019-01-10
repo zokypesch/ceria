@@ -203,18 +203,34 @@ func (repo *MasterRepository) Create(override interface{}) (int64, error) {
 
 	values = cvrt.ConvertStructToSingeMap(realModel)
 
-	if _, ok := values["Model"]; !ok {
-		return ID, cr.Error
+	// if _, ok := values["ID"]; !ok {
+	// 	return ID, cr.Error
+	// }
+
+	// modelData, _ := cvrt.ConvertInterfaceMaptoMap(values["Model"])
+	// if val, ok := modelData["ID"]; ok {
+	// 	ID, err = strconv.ParseInt(val, 0, 64)
+	// }
+
+	valOfID, ok := values["ID"]
+
+	if !ok {
+		return ID, fmt.Errorf("Failed to get ID")
 	}
 
-	modelData, _ := cvrt.ConvertInterfaceMaptoMap(values["Model"])
-	if val, ok := modelData["ID"]; ok {
-		ID, err = strconv.ParseInt(val, 0, 64)
+	ID, err = strconv.ParseInt(valOfID.(string), 0, 64)
+
+	if err != nil {
+		return ID, err
 	}
 
 	// create in elastic
 	if repo.WithElastic {
-		repo.coreElastic.AddDocument(modelData["ID"], realModel)
+		util.NewUtilConvertToMap().SetFieldNullByTag(realModel) // setnull by tagging
+		errElastic := repo.coreElastic.AddDocument(valOfID.(string), realModel)
+		if errElastic != nil {
+			return ID, errElastic
+		}
 	}
 
 	return ID, cr.Error
@@ -245,8 +261,11 @@ func (repo *MasterRepository) Update(condition map[string]interface{}, data map[
 			stValue := st.Elem()
 
 			mdl := stValue.FieldByName("Model")
+			newValuePassing := st.Interface()
 
-			errElastic := repo.coreElastic.EditDocument(newUtil.ConvertDataToString(mdl.Field(0).Interface()), st.Interface())
+			util.NewUtilConvertToMap().SetFieldNullByTag(newValuePassing) // setnull by tagging
+
+			errElastic := repo.coreElastic.EditDocument(newUtil.ConvertDataToString(mdl.Field(0).Interface()), newValuePassing)
 			errSlice = append(errSlice, errElastic)
 		}
 	}

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,7 +9,7 @@ import (
 )
 
 func TestElasticCore(t *testing.T) {
-	type Example struct {
+	type ExampleElasticTest struct {
 		Name string
 		Age  string
 	}
@@ -25,7 +26,7 @@ func TestElasticCore(t *testing.T) {
 	}
 
 	hostElastic := "http://" + host + ":" + port
-	elasticTest, errTest := NewServiceElasticCore(&Example{}, hostElastic)
+	elasticTest, errTest := NewServiceElasticCore(&ExampleElasticTest{}, hostElastic)
 
 	if errTest != nil {
 		return
@@ -47,14 +48,14 @@ func TestElasticCore(t *testing.T) {
 	})
 
 	t.Run("Passing wrong parameter server", func(t *testing.T) {
-		_, err := NewServiceElasticCore(&Example{}, "http://192.68.1.1:9092")
+		_, err := NewServiceElasticCore(&ExampleElasticTest{}, "http://192.68.1.1:9092")
 
 		assert.Error(t, err)
 
 	})
 
 	t.Run("Tes registration Elastic Success", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		_, err := NewServiceElasticCore(&exam, hostElastic)
 
 		assert.NoError(t, err)
@@ -63,22 +64,22 @@ func TestElasticCore(t *testing.T) {
 
 	// Add Document
 	t.Run("Tes add document Elastic Failure", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		newElastic, errAssign := NewServiceElasticCore(&exam, hostElastic)
 		assert.NoError(t, errAssign)
 
-		err := newElastic.AddDocument("", &Example{})
+		err := newElastic.AddDocument("", &ExampleElasticTest{})
 		assert.Error(t, err)
 
 	})
 
 	t.Run("Tes add document Elastic Success", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		newElastic, errAssign := NewServiceElasticCore(&exam, hostElastic)
 		assert.NoError(t, errAssign)
 
 		if newElastic != nil {
-			err := newElastic.AddDocument("1", &Example{"udin", "30"})
+			err := newElastic.AddDocument("1", &ExampleElasticTest{"udin", "30"})
 			assert.NoError(t, err)
 		}
 
@@ -86,22 +87,22 @@ func TestElasticCore(t *testing.T) {
 
 	// Edit Document
 	t.Run("Tes edit document Elastic Failure", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		newElastic, errAssign := NewServiceElasticCore(&exam, hostElastic)
 		assert.NoError(t, errAssign)
 
-		err := newElastic.EditDocument("", &Example{})
+		err := newElastic.EditDocument("", &ExampleElasticTest{})
 		assert.Error(t, err)
 
 	})
 
 	t.Run("Tes edit document Elastic Success", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		newElastic, errAssign := NewServiceElasticCore(&exam, hostElastic)
 		assert.NoError(t, errAssign)
 
 		if newElastic != nil {
-			err := newElastic.EditDocument("1", &Example{"paijo", "30"})
+			err := newElastic.EditDocument("1", &ExampleElasticTest{"paijo", "30"})
 			assert.NoError(t, err)
 		}
 
@@ -109,7 +110,7 @@ func TestElasticCore(t *testing.T) {
 
 	// Delete Document
 	t.Run("Tes delete document Elastic Failure", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		newElastic, err := NewServiceElasticCore(&exam, hostElastic)
 		assert.NoError(t, err)
 
@@ -119,12 +120,13 @@ func TestElasticCore(t *testing.T) {
 	})
 
 	t.Run("Tes delete document Elastic Success", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		newElastic, err := NewServiceElasticCore(&exam, hostElastic)
 		assert.NoError(t, err)
 
 		if newElastic != nil {
 			errAssign := newElastic.DeleteDocument("1")
+			fmt.Println(errAssign)
 			assert.NoError(t, errAssign)
 		}
 
@@ -132,7 +134,7 @@ func TestElasticCore(t *testing.T) {
 
 	// Delete index
 	t.Run("Tes delete index Elastic Success", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		newElastic, err := NewServiceElasticCore(&exam, hostElastic)
 		assert.NoError(t, err)
 
@@ -144,7 +146,7 @@ func TestElasticCore(t *testing.T) {
 	})
 
 	t.Run("Tes delete index Elastic Failed", func(t *testing.T) {
-		var exam Example
+		var exam ExampleElasticTest
 		newElastic, err := NewServiceElasticCore(&exam, hostElastic)
 		assert.NoError(t, err)
 
