@@ -1,4 +1,4 @@
-# Always Wasting time, Idiot matic !!!
+# Always Wasting time !!!
 
 # Beta Version 0.1.0
 
