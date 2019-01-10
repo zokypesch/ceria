@@ -1,4 +1,4 @@
-# Always Wasting time, Idiot matic !!!
+# Always Wasting time !!!
 
 # Beta Version 0.1.0
 
@@ -156,4 +156,12 @@ Response
 not fine thanks"}],"error":"","message":"","page":"1","status":true,"total_data":"1"}
 
 ```
+# Need your contribution
+please contact me at maulanaoktofitriadi@gmail.com
+
+```
+are you a programmer ??? need a job ??
+please send your CV to hr.recruitment@klb.co.id
+```
+
 # Happy coding guys :)
