@@ -166,7 +166,7 @@ func TestElasticCore(t *testing.T) {
 		}
 
 		type ExampleElasticTestMulti struct {
-			gorm.DB
+			gorm.Model
 			Name   string
 			Age    string
 			Multi  []EmailCustom
@@ -174,8 +174,9 @@ func TestElasticCore(t *testing.T) {
 		}
 
 		exam := ExampleElasticTestMulti{
-			Name: "ajui",
-			Age:  "30",
+			Model: gorm.Model{ID: 1},
+			Name:  "ajui",
+			Age:   "30",
 			Multi: []EmailCustom{
 				EmailCustom{Email: "asd@gmail.com"},
 				EmailCustom{Email: "asdfg@gmail.com"},
@@ -187,8 +188,8 @@ func TestElasticCore(t *testing.T) {
 		assert.NoError(t, err)
 
 		if newElastic != nil {
-			errAssign := newElastic.MultipleinsertDocumentByStruct(&exam)
-			newElastic.MultipleinsertDocumentByStruct(5)
+			errAssign := newElastic.MultipleinsertDocumentByStruct("1", &exam)
+			newElastic.MultipleinsertDocumentByStruct("1", 5)
 			assert.NoError(t, errAssign)
 		}
 

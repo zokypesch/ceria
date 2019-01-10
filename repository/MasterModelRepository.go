@@ -227,11 +227,11 @@ func (repo *MasterRepository) Create(override interface{}) (int64, error) {
 	// create in elastic
 	if repo.WithElastic {
 
-		repo.coreElastic.MultipleinsertDocumentByStruct(realModel)
+		repo.coreElastic.MultipleinsertDocumentByStruct(valOfID.(string), realModel)
 
-		util.NewUtilConvertToMap().SetFieldNullByTag(realModel) // setnull by tagging
+		// util.NewUtilConvertToMap().SetFieldNullByTag(realModel) // setnull by tagging
 		// errElastic := repo.coreElastic.AddDocument(valOfID.(string), realModel)
-		repo.coreElastic.AddDocument(valOfID.(string), realModel)
+		// repo.coreElastic.AddDocument(valOfID.(string), realModel)
 		// if errElastic != nil {
 		// 	return ID, errElastic
 		// }

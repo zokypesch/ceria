@@ -151,7 +151,7 @@ func (elasticCore *ElasticCore) DeleteIndex() error {
 }
 
 // MultipleinsertDocumentByStruct for struct inheretence
-func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(str interface{}) error {
+func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, str interface{}) error {
 	var field reflect.Value
 
 	switch reflect.ValueOf(str).Kind() {
@@ -167,11 +167,9 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(str interface{}) 
 		fieldValue := field.Field(i)
 		fieldName := util.NewUtilConvertToMap().ConvertDataToString(field.Type().Field(i).Name)
 
-		if fieldName == "Model" && (fieldValue.Kind() == reflect.Ptr || fieldValue.Kind() == reflect.Struct) {
-			continue
-		}
-
-		if fieldValue.Kind() == reflect.Invalid {
+		if fieldValue.Kind() == reflect.Invalid || fieldName == "Model" {
+			newValueOfInvalid := reflect.New(fieldValue.Type()).Elem()
+			fieldValue.Set(newValueOfInvalid)
 			continue
 		}
 
@@ -182,7 +180,13 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(str interface{}) 
 
 				idx := fmt.Sprintf("%ss", strings.ToLower(st.Type().Name()))
 
-				newID := st.Field(0).String()
+				var newID string
+				newSubValue := st.Field(0)
+				newID = newSubValue.String()
+
+				if newSubValue.Type().Name() == "Model" {
+					newID = util.NewUtilConvertToMap().ConvertDataToString(newSubValue.FieldByName("ID"))
+				}
 
 				elasticCore.Client.Index().
 					Index(idx).
@@ -192,22 +196,49 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(str interface{}) 
 					Refresh("wait_for").
 					Do(context.Background())
 			}
+			newValueOfInvalid := reflect.New(fieldValue.Type()).Elem()
+			fieldValue.Set(newValueOfInvalid)
 
 		case reflect.Ptr, reflect.Struct:
 			idx := fmt.Sprintf("%ss", strings.ToLower(fieldName))
-			newID := fieldValue.Field(0).String()
+			subValue := fieldValue
+
+			var newID string
+
+			if fieldValue.Kind() == reflect.Ptr {
+				subValue = fieldValue.Elem()
+			}
+
+			newSubValue := subValue.Field(0)
+			newID = newSubValue.String()
+
+			if newSubValue.Type().Name() == "Model" {
+				newID = util.NewUtilConvertToMap().ConvertDataToString(newSubValue.FieldByName("ID"))
+			}
 
 			elasticCore.Client.Index().
 				Index(idx).
 				Type("doc").
 				Id(newID).
-				BodyJson(field.Interface()).
+				BodyJson(fieldValue.Interface()).
 				Refresh("wait_for").
 				Do(context.Background())
+
+			newValueOfInvalid := reflect.New(fieldValue.Type()).Elem()
+			fieldValue.Set(newValueOfInvalid)
+
 		default:
 			continue
 		}
 	}
+
+	elasticCore.Client.Index().
+		Index(elasticCore.Index).
+		Type("doc").
+		Id(IDParams).
+		BodyJson(field.Interface()).
+		Refresh("wait_for").
+		Do(context.Background())
 
 	return nil
 }
