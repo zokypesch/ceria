@@ -1,8 +1,9 @@
 package core
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/zokypesch/ceria/helper"
@@ -126,7 +127,6 @@ func TestElasticCore(t *testing.T) {
 
 		if newElastic != nil {
 			errAssign := newElastic.DeleteDocument("1")
-			fmt.Println(errAssign)
 			assert.NoError(t, errAssign)
 		}
 
@@ -154,6 +154,42 @@ func TestElasticCore(t *testing.T) {
 			newElastic.Index = "Uknow"
 			errAssign := newElastic.DeleteIndex()
 			assert.Error(t, errAssign)
+		}
+
+	})
+
+	//Tes MultipleinsertDocumentByStruct
+	t.Run("Tes MultipleinsertDocumentByStruct index Elastic", func(t *testing.T) {
+
+		type EmailCustom struct {
+			Email string
+		}
+
+		type ExampleElasticTestMulti struct {
+			gorm.DB
+			Name   string
+			Age    string
+			Multi  []EmailCustom
+			Single EmailCustom
+		}
+
+		exam := ExampleElasticTestMulti{
+			Name: "ajui",
+			Age:  "30",
+			Multi: []EmailCustom{
+				EmailCustom{Email: "asd@gmail.com"},
+				EmailCustom{Email: "asdfg@gmail.com"},
+			},
+			Single: EmailCustom{Email: "asdfghijk@gmail.com"},
+		}
+
+		newElastic, err := NewServiceElasticCore(&exam, hostElastic)
+		assert.NoError(t, err)
+
+		if newElastic != nil {
+			errAssign := newElastic.MultipleinsertDocumentByStruct(&exam)
+			newElastic.MultipleinsertDocumentByStruct(5)
+			assert.NoError(t, errAssign)
 		}
 
 	})

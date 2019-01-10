@@ -149,3 +149,65 @@ func (elasticCore *ElasticCore) DeleteIndex() error {
 
 	return nil
 }
+
+// MultipleinsertDocumentByStruct for struct inheretence
+func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(str interface{}) error {
+	var field reflect.Value
+
+	switch reflect.ValueOf(str).Kind() {
+	case reflect.Ptr:
+		field = reflect.ValueOf(str).Elem()
+	case reflect.Struct:
+		field = reflect.ValueOf(str)
+	default:
+		return nil
+	}
+
+	for i := 0; i < field.NumField(); i++ {
+		fieldValue := field.Field(i)
+		fieldName := util.NewUtilConvertToMap().ConvertDataToString(field.Type().Field(i).Name)
+
+		if fieldName == "Model" && (fieldValue.Kind() == reflect.Ptr || fieldValue.Kind() == reflect.Struct) {
+			continue
+		}
+
+		if fieldValue.Kind() == reflect.Invalid {
+			continue
+		}
+
+		switch fieldValue.Kind() {
+		case reflect.Slice:
+			for j := 0; j < fieldValue.Len(); j++ {
+				st := fieldValue.Index(j)
+
+				idx := fmt.Sprintf("%ss", strings.ToLower(st.Type().Name()))
+
+				newID := st.Field(0).String()
+
+				elasticCore.Client.Index().
+					Index(idx).
+					Type("doc").
+					Id(newID).
+					BodyJson(st.Interface()).
+					Refresh("wait_for").
+					Do(context.Background())
+			}
+
+		case reflect.Ptr, reflect.Struct:
+			idx := fmt.Sprintf("%ss", strings.ToLower(fieldName))
+			newID := fieldValue.Field(0).String()
+
+			elasticCore.Client.Index().
+				Index(idx).
+				Type("doc").
+				Id(newID).
+				BodyJson(field.Interface()).
+				Refresh("wait_for").
+				Do(context.Background())
+		default:
+			continue
+		}
+	}
+
+	return nil
+}
