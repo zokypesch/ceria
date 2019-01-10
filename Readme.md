@@ -79,14 +79,17 @@ for run example rabbitMQ type "cd examples/rabbitMQ && go run main.go"
 ```
 
 # Clean Setup
-`note: make sure postgresql, rabbitmq, elastic, redis run in your machine`
+`note: make sure postgresql, rabbitmq, elastic, redis run in your machine or if you want to disable please change status to false in config.development.yaml, for this version only support postgresql`
 
 ```
-mkdir example_project"
+mkdir example_project
 dep init
-make init mode=development
+dep ensure -add github.com/zokypesch/ceria
+dep ensure
 
-touch config.development.yaml
+touch config.yaml
+// edit config.yaml
+mode: development
 
 touch config.development.yaml
 
@@ -216,7 +219,7 @@ import (
 	"github.com/zokypesch/ceria"
 	hlp "github.com/zokypesch/ceria/helper"
 	"github.com/zokypesch/ceria/repository"
-	"github.com/zokypesch/example-ceria/helper"
+	"your-directory-project/helper"
 )
 
 type Article struct {
