@@ -175,6 +175,11 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, 
 
 		switch fieldValue.Kind() {
 		case reflect.Slice:
+
+			if fieldValue.Interface() == reflect.Zero(fieldValue.Type()).Interface() {
+				continue
+			}
+
 			for j := 0; j < fieldValue.Len(); j++ {
 				st := fieldValue.Index(j)
 
@@ -200,6 +205,9 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, 
 			fieldValue.Set(newValueOfInvalid)
 
 		case reflect.Ptr, reflect.Struct:
+			if fieldValue.Interface() == reflect.Zero(fieldValue.Type()).Interface() {
+				continue
+			}
 			idx := fmt.Sprintf("%ss", strings.ToLower(fieldName))
 			subValue := fieldValue
 
