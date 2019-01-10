@@ -75,9 +75,188 @@ make rundb
 
 see example in folder example and "go run main.go"
 for full example type "cd examples/wrapper && go run main.go" 
+for run example rabbitMQ type "cd examples/rabbitMQ && go run main.go"
 ```
 
-# Open your Postman or using Curl
+# Clean Setup
+`note: make sure postgresql, rabbitmq, elastic, redis run in your machine`
+
+```
+mkdir example_project"
+dep init
+make init mode=development
+
+touch config.development.yaml
+
+touch config.development.yaml
+
+//edit config.development.yaml
+
+db:
+  STATUS: true
+  PORT: 5432
+  DRIVER: postgres
+  HOST: localhost
+  USER: local
+  PASSWORD: local
+  NAME: local
+elastic:
+  STATUS: true
+  HOST: 127.0.0.1
+  PORT: 9200
+redis:
+  STATUS: true
+  HOST: 127.0.0.1
+  PORT: 6379
+rabbitmq:
+  STATUS: true
+  HOST: 127.0.0.1
+  HOSTNAME: amqp
+  PORT: 5672
+  USER: rabbitmq
+  PASSWORD: rabbitmq
+
+mkdir helper
+cd helper && touch helper.go
+
+// edit file helper.go
+
+package helper
+
+import (
+	"strconv"
+
+	ceria "github.com/zokypesch/ceria"
+	"github.com/zokypesch/ceria/core"
+	"github.com/zokypesch/ceria/helper"
+	hlp "github.com/zokypesch/ceria/helper"
+	repo "github.com/zokypesch/ceria/repository"
+	routeService "github.com/zokypesch/ceria/route"
+)
+
+// GetDB for get db service wrapping
+func GetDB() *core.Connection {
+	config := helper.NewReadConfigService()
+	config.Init()
+
+	port, _ := strconv.Atoi(config.GetByName("db.port"))
+
+	db := core.NewServiceConnection(
+		config.GetByName("db.driver"),
+		config.GetByName("db.host"),
+		port,
+		config.GetByName("db.user"),
+		config.GetByName("db.password"),
+		config.GetByName("db.name"),
+	)
+	return db
+}
+
+// GetRouter func for get router
+func GetRouter() (*routeService.GinCfg, *repo.ElasticProperties) {
+	config := helper.NewReadConfigService()
+	config.Init()
+
+	initRouter := routeService.NewRouteService(true, "./templates", false)
+
+	myElastic := &repo.ElasticProperties{}
+	if config.GetByName("elastic.status") == "true" {
+		myElastic = &repo.ElasticProperties{
+			Status: true,
+			Host:   config.GetByName("elastic.host"),
+			Port:   config.GetByName("elastic.port"),
+		}
+	}
+
+	return initRouter, myElastic
+}
+
+// GetGroup for get group default nil
+func GetGroup(name string) *ceria.GroupConfiguration {
+	return &ceria.GroupConfiguration{
+		Name:       name,
+		Middleware: nil,
+	}
+}
+
+// GetRabbitMQ for get configuration in rabbitMQ
+func GetRabbitMQ() (*core.RabbitMQCore, error) {
+	config := hlp.NewReadConfigService()
+	config.Init()
+
+	host := config.GetByName("rabbitmq.host")
+	hostname := config.GetByName("rabbitmq.hostname")
+	port := config.GetByName("rabbitmq.port")
+	user := config.GetByName("rabbitmq.user")
+	password := config.GetByName("rabbitmq.password")
+
+	rb, errNew := core.NewServiceRabbitMQ(&core.RabbitMQConfig{
+		Host:       host,
+		Hostname:   hostname,
+		Port:       port,
+		User:       user,
+		Password:   password,
+		WorkerName: "my_task",
+	})
+
+	return rb, errNew
+}
+
+touch main.go
+
+// edit your main.go
+
+package main
+
+import (
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/zokypesch/ceria"
+	hlp "github.com/zokypesch/ceria/helper"
+	"github.com/zokypesch/ceria/repository"
+	"github.com/zokypesch/example-ceria/helper"
+)
+
+type Article struct {
+	gorm.Model
+	Title  string  `json:"title" binding:"required,max=10"`
+	Tag    string  `json:"tag"`
+	Body   string  `json:"body" binding:"required"`
+}
+
+func main() {
+	fmt.Println("Welcome to example ceria !")
+
+	db := helper.GetDB()
+	initRouter, elastic := helper.GetRouter()
+	grp := helper.GetGroup("")
+
+	dbs, _ := db.GetConn()
+
+	dbs.Migrate(&Article{})
+
+	ceria.RegisterModel(
+		initRouter,
+		db,
+		elastic,
+		Article{},
+		grp,
+		&repository.QueryProps{PreloadStatus: true, Preload: []string{},
+			WithPagination: true},
+		nil,
+	)
+
+	r, _ := initRouter.Register(true)
+    
+	r.Run(":9090")
+}
+
+go run main.go
+```
+
+# Open your Postman or using Curl (i expect your using example project)
 ```
 Get Data
 curl -H "Accept: application/json" -X GET http://localhost:9090/articles?page=1&limit=30
@@ -158,10 +337,5 @@ not fine thanks"}],"error":"","message":"","page":"1","status":true,"total_data"
 ```
 # Need your contribution
 please contact me at maulanaoktofitriadi@gmail.com
-
-```
-are you a programmer ??? need a job ??
-please send your CV to hr.recruitment@klb.co.id
-```
 
 # Happy coding guys :)
