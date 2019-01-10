@@ -274,6 +274,7 @@ func TestRouteHandler(t *testing.T) {
 	})
 
 	t.Run("Check Bulk Create Handler", func(t *testing.T) {
+
 		jsonParams := []Example{
 			Example{Model: gorm.Model{ID: 1}, Title: "titl 1", Author: "triadi"},
 			Example{Model: gorm.Model{ID: 2}, Title: "titl 2", Author: "triadi"},
@@ -291,6 +292,23 @@ func TestRouteHandler(t *testing.T) {
 	t.Run("Check Failure Bulk Delete Handler", func(t *testing.T) {
 		response = nil
 		jsonParams := []map[string]int{}
+
+		jsonValue, _ := json.Marshal(jsonParams)
+
+		w := newHelper.TestAPI(r, "POST", "/examples/bulkdelete", jsonValue, nil)
+		json.Unmarshal([]byte(w.Body.String()), &response)
+
+		assert.NotEqual(t, http.StatusOK, w.Code)
+		assert.False(t, response["status"].(bool))
+		assert.NotEmpty(t, response["message"].(string))
+
+	})
+
+	t.Run("Check Failure Bulk Delete Empty params Handler", func(t *testing.T) {
+		response = nil
+		jsonParams := map[string]interface{}{
+			"data": []map[string]interface{}{},
+		}
 
 		jsonValue, _ := json.Marshal(jsonParams)
 
@@ -339,6 +357,20 @@ func TestRouteHandler(t *testing.T) {
 		assert.NotEmpty(t, response["message"].(string))
 	})
 
+	t.Run("Find Data Failure empty param", func(t *testing.T) {
+		response = nil
+		jsonParams := map[string]string{}
+
+		jsonValue, _ := json.Marshal(jsonParams)
+
+		w := newHelper.TestAPI(r, "POST", "/examples/find", jsonValue, nil)
+		json.Unmarshal([]byte(w.Body.String()), &response)
+
+		assert.NotEqual(t, http.StatusOK, w.Code)
+		assert.False(t, response["status"].(bool))
+		assert.NotEmpty(t, response["message"].(string))
+	})
+
 	t.Run("Find Data", func(t *testing.T) {
 		response = nil
 
@@ -357,6 +389,21 @@ func TestRouteHandler(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.True(t, response["status"].(bool))
 	})
+
+	// t.Run("check failure Bulk Create error db when create Handler", func(t *testing.T) {
+	// 	jsonParams := []Example{}
+	// 	jsonValue, _ := json.Marshal(jsonParams)
+
+	// 	mocket.Catcher.Reset().NewMock().WithError(fmt.Errorf("SQL Error"))
+
+	// 	w := newHelper.TestAPI(r, "POST", "/examples/bulkcreate", jsonValue, nil)
+	// 	json.Unmarshal([]byte(w.Body.String()), &response)
+
+	// 	assert.NotEqual(t, http.StatusOK, w.Code)
+	// 	assert.False(t, response["status"].(bool))
+	// 	assert.NotEmpty(t, response["message"].(string))
+
+	// })
 }
 
 func TestWithMiddleWare(t *testing.T) {

@@ -49,6 +49,15 @@ func TestFillDefaultStruct(t *testing.T) {
 
 		str2 := sInter.GetNameOfStruct(&newParams)
 		assert.Equal(t, str2, "int")
+
+		// test of struct
+		type TestMyStructName struct {
+			Name string
+		}
+
+		assert.Equal(t, "TestMyStructName", sInter.GetNameOfStruct(TestMyStructName{}))
+		assert.Equal(t, "TestMyStructName", sInter.GetNameOfStruct(&TestMyStructName{}))
+
 	})
 
 	t.Run("Tes Get Name failed params of struct", func(t *testing.T) {

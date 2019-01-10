@@ -227,10 +227,11 @@ func (repo *MasterRepository) Create(override interface{}) (int64, error) {
 	// create in elastic
 	if repo.WithElastic {
 		util.NewUtilConvertToMap().SetFieldNullByTag(realModel) // setnull by tagging
-		errElastic := repo.coreElastic.AddDocument(valOfID.(string), realModel)
-		if errElastic != nil {
-			return ID, errElastic
-		}
+		// errElastic := repo.coreElastic.AddDocument(valOfID.(string), realModel)
+		repo.coreElastic.AddDocument(valOfID.(string), realModel)
+		// if errElastic != nil {
+		// 	return ID, errElastic
+		// }
 	}
 
 	return ID, cr.Error
@@ -249,7 +250,7 @@ func (repo *MasterRepository) Update(condition map[string]interface{}, data map[
 
 	cr := repo.Conn.Model(newModel).Where(condition).Updates(data)
 
-	var errSlice []error
+	// var errSlice []error
 	// update in elastic to be continued
 	if repo.WithElastic && cr.Error == nil {
 		repo.Conn.Where(condition).Find(sliceModel)
@@ -265,14 +266,15 @@ func (repo *MasterRepository) Update(condition map[string]interface{}, data map[
 
 			util.NewUtilConvertToMap().SetFieldNullByTag(newValuePassing) // setnull by tagging
 
-			errElastic := repo.coreElastic.EditDocument(newUtil.ConvertDataToString(mdl.Field(0).Interface()), newValuePassing)
-			errSlice = append(errSlice, errElastic)
+			repo.coreElastic.EditDocument(newUtil.ConvertDataToString(mdl.Field(0).Interface()), newValuePassing)
+			// errElastic := repo.coreElastic.EditDocument(newUtil.ConvertDataToString(mdl.Field(0).Interface()), newValuePassing)
+			// errSlice = append(errSlice, errElastic)
 		}
 	}
 
-	if len(errSlice) > 0 {
-		return errSlice[0]
-	}
+	// if len(errSlice) > 0 {
+	// 	return errSlice[0]
+	// }
 
 	return cr.Error
 }

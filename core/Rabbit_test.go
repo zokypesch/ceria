@@ -28,8 +28,14 @@ func TestNewService(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("Failed Registration wrong param RabbitMQ", func(t *testing.T) {
+		_, err := NewServiceRabbitMQ(&RabbitMQConfig{"192.168.7.7", "hostname", port, "user", password, ""})
+
+		assert.Error(t, err)
+	})
+
 	t.Run("Failed Registration wrong host RabbitMQ", func(t *testing.T) {
-		_, err := NewServiceRabbitMQ(&RabbitMQConfig{"192.168.0.1", hostname, port, user, password, ""})
+		_, err := NewServiceRabbitMQ(&RabbitMQConfig{"192.168.7.7", "hostname", port, "user", password, "test123"})
 
 		assert.Error(t, err)
 	})

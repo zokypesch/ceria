@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jinzhu/gorm"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -49,8 +51,24 @@ func TestConvertToMap(t *testing.T) {
 	tesRes := util.ConvertMultiStructToMap(listKeys)
 	assert.Len(t, tesRes, 2)
 
+	// PTR test
+	tesRes = util.ConvertMultiStructToMap(&listKeys)
+	assert.Len(t, tesRes, 2)
+
 	// test a single struct
 	assert.Len(t, util.ConvertStructToSingeMap(&Keys{}), 2)
+
+	// test a struct nested
+	type StructNestedTest struct {
+		gorm.Model
+		Name string
+	}
+
+	testStructNested := &StructNestedTest{
+		Name: "perjaka witan",
+	}
+
+	assert.Len(t, util.ConvertStructToSingeMap(testStructNested), 5)
 
 	var uiMode uint
 	uiMode = 64
@@ -118,6 +136,16 @@ func TestConvertToMap(t *testing.T) {
 	}
 
 	assert.Len(t, resMulti, 4)
+
+	// convert datetime to string test
+	var interfaceToTest interface{}
+	now := time.Now()
+	interfaceToTest = &now
+
+	assert.NotEmpty(t, util.ConvertDataToString(interfaceToTest))
+
+	// reuseable test
+	util = NewUtilConvertToMap()
 
 	// check iterature in reflect
 	var param reflect.Value
@@ -191,4 +219,8 @@ func TestConvertToMap(t *testing.T) {
 	valStrAfterSetNon := reflect.ValueOf(resultSetStrNon)
 	fieldToTestNon := valStrAfterSetNon.FieldByName("non")
 	assert.Empty(t, fieldToTestNon)
+
+	// tested not struct and not ptr whichis is string or other
+	stringTested := "abcd"
+	assert.Empty(t, util.SetFieldNullByTag(stringTested))
 }

@@ -35,20 +35,25 @@ func NewServiceRabbitMQ(config *RabbitMQConfig) (*RabbitMQCore, error) {
 	utils := util.NewUtilService(config)
 	err := utils.Validate()
 
+	var erCh error
+
 	if err != nil {
 		return nil, err
 	}
 
 	fullAddress := fmt.Sprintf("%s://%s:%s@%s:%s/", config.Hostname, config.User, config.Password, config.Host, config.Port)
 	conn, errConn := amqp.Dial(fullAddress)
+
 	if errConn != nil {
 		return nil, errConn
 	}
 
-	ch, errCh := conn.Channel()
-	if errConn != nil {
-		return nil, errCh
-	}
+	ch, errChannel := conn.Channel()
+	erCh = errChannel // bind this
+
+	// if errConn != nil {
+	// 	return nil, errCh
+	// }
 
 	q, errQueue := ch.QueueDeclare(
 		config.WorkerName, // name
@@ -58,10 +63,15 @@ func NewServiceRabbitMQ(config *RabbitMQConfig) (*RabbitMQCore, error) {
 		false,             // no-wait
 		nil,               // arguments
 	)
+	erCh = errQueue
 
-	if errQueue != nil {
+	if erCh != nil {
 		return nil, errQueue
 	}
+
+	// if errQueue != nil {
+	// 	return nil, errQueue
+	// }
 
 	return &RabbitMQCore{
 		Config:  config,
@@ -93,11 +103,8 @@ func (rb *RabbitMQCore) RegisterWorker() (<-chan amqp.Delivery, error) {
 		false,                // no-wait
 		nil,                  // args
 	)
-	if errConsum != nil {
-		return nil, errConsum
-	}
 
-	return msgs, nil
+	return msgs, errConsum
 }
 
 // RegisterNewTask for register new task
