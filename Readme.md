@@ -219,7 +219,7 @@ import (
 	"github.com/zokypesch/ceria"
 	hlp "github.com/zokypesch/ceria/helper"
 	"github.com/zokypesch/ceria/repository"
-	"github.com/zokypesch/example-ceria/helper"
+	"your-directory-project/helper"
 )
 
 type Article struct {
