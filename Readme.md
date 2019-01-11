@@ -11,7 +11,7 @@ How long did it take to finish this from scratch ??? 3 days ??? 2 days ?? 1 days
 ![Screenshot](ERD.png)
 
 Don’t sad baby …..
-If you are using ceria you cant do it for 5 minutes
+If you are using ceria you can do it for 5 minutes
 
 ```
 SAY no to killing my time …
@@ -68,7 +68,7 @@ Ceria Wrapper
 
 # How to it works ?
 ```
-clone or deownload example in https://github.com/zokypesch/example-ceria
+example project different repository, you can fin & clone or download example in https://github.com/zokypesch/example-ceria
 type "make help" in current folder example-ceria
 make init mode=development
 make install_docker
