@@ -15,7 +15,7 @@ If you are using ceria you cant do it for 5 minutes
 
 ```
 SAY no to killing my time …
-Speed development is a key success for your bussiness
+"Speed development is a key success for your bussiness" `Maulana`
 ```
 
 Why choose us
@@ -37,13 +37,12 @@ because ceria is `LIGHT & warm`
 - Ceria using trusted library & high performance
 - Ceria have UNIT & INTEGRATION TEST Coverage more than 90 %
 - Ceria easly customize because it’s transparant
-- Ceria have documentation in code, if your using Go-Lint in visual studio, u can see description method, struct, etc.
 - Ceria core is friendly you can modified it easly
 - Ceria using TDD (Test design driven)
 ```
 
 # Unit & Integration Test
-![Screenshot](ps-unit-integration-test.png)
+![Screenshot](ps-unit-integration-test-c.png)
 
 # Trusted Library use in Ceria Workspace
 ```

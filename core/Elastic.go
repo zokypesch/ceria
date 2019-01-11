@@ -171,34 +171,6 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, 
 	}
 
 	var ch = make(chan *BulkConfigElastic)
-
-	// var sf []reflect.StructField
-	// for i := 0; i < field.NumField(); i++ {
-	// 	fieldValue := field.Field(i)
-	// 	fieldName := field.Type().Field(i).Name
-
-	// 	if fieldName == "Model" && fieldValue.Kind() == reflect.Struct {
-	// 		for j := 0; j < fieldValue.NumField(); j++ {
-	// 			sf = append(sf, reflect.StructField{
-	// 				Name: fieldValue.Type().Field(j).Name,
-	// 				Type: fieldValue.Type().Field(j).Type,
-	// 			})
-	// 		}
-	// 		continue
-	// 	}
-
-	// 	switch fieldValue.Kind() {
-	// 	case reflect.Struct, reflect.Slice, reflect.Ptr:
-	// 		continue
-	// 	}
-
-	// 	sf = append(sf, reflect.StructField{
-	// 		Name: fieldName,
-	// 		Type: field.Type().Field(i).Type,
-	// 	})
-	// }
-	// sTi := reflect.StructOf(sf)
-	// sTn := reflect.New(sTi).Elem()
 	var ignore []reflect.Type
 
 	for i := 0; i < field.NumField(); i++ {
@@ -206,10 +178,6 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, 
 		fieldName := field.Type().Field(i).Name
 
 		if fieldValue.Kind() == reflect.Invalid || (fieldName == "Model" && fieldValue.Kind() == reflect.Struct) {
-			// for j := 0; j < fieldValue.NumField(); j++ {
-			// 	sTn.FieldByName(fieldValue.Type().Field(j).Name).Set(fieldValue.Field(j))
-			// }
-			ignore = append(ignore, fieldValue.Type())
 			continue
 		}
 
@@ -217,11 +185,11 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, 
 		case reflect.Slice:
 			for j := 0; j < fieldValue.Len(); j++ {
 				st := fieldValue.Index(j)
-				ignore = append(ignore, fieldValue.Type())
 
 				go elasticCore.sendExecuteBackgroud(st, ch)
 				elasticCore.doExecuteBackhround(ch)
 			}
+			ignore = append(ignore, fieldValue.Type())
 		case reflect.Ptr, reflect.Struct:
 			if fieldValue.Interface() == reflect.Zero(fieldValue.Type()).Interface() {
 				continue
@@ -238,7 +206,6 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, 
 			elasticCore.doExecuteBackhround(ch)
 
 		default:
-			// sTn.FieldByName(fieldName).Set(fieldValue)
 			continue
 		}
 	}

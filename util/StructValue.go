@@ -112,25 +112,28 @@ func (st *StructValue) SetNilValue(str interface{}) interface{} {
 // RebuilToNewStruct for create new struct and ignore some fields
 func (st *StructValue) RebuilToNewStruct(str interface{}, props *RebuildProperty, withValue bool) (interface{}, error) {
 
-	typ := reflect.TypeOf(str)
-	val := reflect.ValueOf(str)
+	var val reflect.Value
 
-	if str == nil {
-		return nil, fmt.Errorf("Nil struct")
+	switch reflect.ValueOf(str).Kind() {
+	case reflect.Ptr:
+		val = reflect.ValueOf(str).Elem()
+	case reflect.Struct:
+		val = reflect.ValueOf(str)
+	default:
+		return nil, fmt.Errorf("Invalid Type")
 	}
 
-	if typ.Kind() != reflect.Ptr && typ.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("Not struct type")
-	}
+	var (
+		fieldName, finalName string
+		fieldValue           reflect.Value
+		sf                   []reflect.StructField
+		fs                   []string
+	)
+	// var fieldName, finalName string
+	// var fieldValue reflect.Value
+	// var sf []reflect.StructField
+	// var fs []string
 
-	if typ.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	var fieldName, finalName string
-	var fieldValue reflect.Value
-	var sf []reflect.StructField
-	var fs []string
 	fillStruct := make(map[string]reflect.Value)
 
 	general := GeneralUtilService()
@@ -144,7 +147,7 @@ func (st *StructValue) RebuilToNewStruct(str interface{}, props *RebuildProperty
 			continue
 		}
 
-		if ok, _ := general.InArray(fieldValue.Type(), props.IgnoreFieldType); ok {
+		if ok, _ := general.InArray(reflect.Indirect(fieldValue).Type(), props.IgnoreFieldType); ok {
 			continue
 		}
 
