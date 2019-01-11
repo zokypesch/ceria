@@ -21,6 +21,13 @@ type ElasticCore struct {
 // ElasticCoreInter for interfacing function elastic
 type ElasticCoreInter interface{}
 
+// BulkConfigElastic for configuration elastic
+type BulkConfigElastic struct {
+	Index string
+	ID    string
+	Doc   interface{}
+}
+
 // NewServiceElasticCore for new service elastic core
 func NewServiceElasticCore(model interface{}, serverURL string) (*ElasticCore, error) {
 	structName := util.NewServiceStructValue().GetNameOfStruct(model)
@@ -163,13 +170,46 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, 
 		return nil
 	}
 
+	var ch = make(chan *BulkConfigElastic)
+
+	// var sf []reflect.StructField
+	// for i := 0; i < field.NumField(); i++ {
+	// 	fieldValue := field.Field(i)
+	// 	fieldName := field.Type().Field(i).Name
+
+	// 	if fieldName == "Model" && fieldValue.Kind() == reflect.Struct {
+	// 		for j := 0; j < fieldValue.NumField(); j++ {
+	// 			sf = append(sf, reflect.StructField{
+	// 				Name: fieldValue.Type().Field(j).Name,
+	// 				Type: fieldValue.Type().Field(j).Type,
+	// 			})
+	// 		}
+	// 		continue
+	// 	}
+
+	// 	switch fieldValue.Kind() {
+	// 	case reflect.Struct, reflect.Slice, reflect.Ptr:
+	// 		continue
+	// 	}
+
+	// 	sf = append(sf, reflect.StructField{
+	// 		Name: fieldName,
+	// 		Type: field.Type().Field(i).Type,
+	// 	})
+	// }
+	// sTi := reflect.StructOf(sf)
+	// sTn := reflect.New(sTi).Elem()
+	var ignore []reflect.Type
+
 	for i := 0; i < field.NumField(); i++ {
 		fieldValue := field.Field(i)
-		fieldName := util.NewUtilConvertToMap().ConvertDataToString(field.Type().Field(i).Name)
+		fieldName := field.Type().Field(i).Name
 
-		if fieldValue.Kind() == reflect.Invalid || fieldName == "Model" {
-			newValueOfInvalid := reflect.New(fieldValue.Type()).Elem()
-			fieldValue.Set(newValueOfInvalid)
+		if fieldValue.Kind() == reflect.Invalid || (fieldName == "Model" && fieldValue.Kind() == reflect.Struct) {
+			// for j := 0; j < fieldValue.NumField(); j++ {
+			// 	sTn.FieldByName(fieldValue.Type().Field(j).Name).Set(fieldValue.Field(j))
+			// }
+			ignore = append(ignore, fieldValue.Type())
 			continue
 		}
 
@@ -177,71 +217,75 @@ func (elasticCore *ElasticCore) MultipleinsertDocumentByStruct(IDParams string, 
 		case reflect.Slice:
 			for j := 0; j < fieldValue.Len(); j++ {
 				st := fieldValue.Index(j)
+				ignore = append(ignore, fieldValue.Type())
 
-				idx := fmt.Sprintf("%ss", strings.ToLower(st.Type().Name()))
-
-				var newID string
-				newSubValue := st.Field(0)
-				newID = newSubValue.String()
-
-				if newSubValue.Type().Name() == "Model" {
-					newID = util.NewUtilConvertToMap().ConvertDataToString(newSubValue.FieldByName("ID"))
-				}
-
-				elasticCore.Client.Index().
-					Index(idx).
-					Type("doc").
-					Id(newID).
-					BodyJson(st.Interface()).
-					Refresh("wait_for").
-					Do(context.Background())
+				go elasticCore.sendExecuteBackgroud(st, ch)
+				elasticCore.doExecuteBackhround(ch)
 			}
-			newValueOfInvalid := reflect.New(fieldValue.Type()).Elem()
-			fieldValue.Set(newValueOfInvalid)
-
 		case reflect.Ptr, reflect.Struct:
 			if fieldValue.Interface() == reflect.Zero(fieldValue.Type()).Interface() {
 				continue
 			}
-			idx := fmt.Sprintf("%ss", strings.ToLower(fieldName))
 			subValue := fieldValue
-
-			var newID string
 
 			if fieldValue.Kind() == reflect.Ptr {
 				subValue = fieldValue.Elem()
 			}
 
-			newSubValue := subValue.Field(0)
-			newID = newSubValue.String()
+			ignore = append(ignore, subValue.Type())
 
-			if newSubValue.Type().Name() == "Model" {
-				newID = util.NewUtilConvertToMap().ConvertDataToString(newSubValue.FieldByName("ID"))
-			}
-
-			elasticCore.Client.Index().
-				Index(idx).
-				Type("doc").
-				Id(newID).
-				BodyJson(fieldValue.Interface()).
-				Refresh("wait_for").
-				Do(context.Background())
-
-			newValueOfInvalid := reflect.New(fieldValue.Type()).Elem()
-			fieldValue.Set(newValueOfInvalid)
+			go elasticCore.sendExecuteBackgroud(subValue, ch)
+			elasticCore.doExecuteBackhround(ch)
 
 		default:
+			// sTn.FieldByName(fieldName).Set(fieldValue)
 			continue
 		}
 	}
 
-	elasticCore.Client.Index().
-		Index(elasticCore.Index).
-		Type("doc").
-		Id(IDParams).
-		BodyJson(field.Interface()).
-		Refresh("wait_for").
-		Do(context.Background())
+	rebuildProps := &util.RebuildProperty{
+		IgnoreFieldString: []string{},
+		IgnoreFieldType:   ignore,
+		MoveToMember:      []string{"Model"},
+	}
+
+	sTn, _ := util.NewServiceStructValue().RebuilToNewStruct(field.Interface(), rebuildProps, true)
+
+	go func() {
+		ch <- &BulkConfigElastic{Index: elasticCore.Index, ID: IDParams, Doc: sTn}
+	}()
+
+	elasticCore.doExecuteBackhround(ch)
+
+	go elasticCore.Client.Index().Refresh("wait_for").Do(context.Background())
 
 	return nil
+}
+
+// SendExecuteBackgroud for execute create struct in golang
+func (elasticCore *ElasticCore) sendExecuteBackgroud(rfl reflect.Value, ch chan<- *BulkConfigElastic) {
+	idx := fmt.Sprintf("%ss", strings.ToLower(rfl.Type().Name()))
+	var newID string
+	newSubValue := rfl.Field(0)
+	newID = newSubValue.String()
+
+	if newSubValue.Type().Name() == "Model" {
+		newID = util.NewUtilConvertToMap().ConvertDataToString(newSubValue.FieldByName("ID"))
+	}
+
+	ch <- &BulkConfigElastic{Index: idx, ID: newID, Doc: rfl.Interface()}
+}
+
+// DoExecuteBackground for execute create document as background
+func (elasticCore *ElasticCore) doExecuteBackhround(ref <-chan *BulkConfigElastic) {
+
+	newCfg := <-ref
+
+	elasticCore.Client.Index().
+		Index(newCfg.Index).
+		Type("doc").
+		Id(newCfg.ID).
+		BodyJson(newCfg.Doc).
+		Refresh("").
+		Do(context.Background())
 }

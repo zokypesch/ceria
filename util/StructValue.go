@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 )
@@ -11,6 +12,13 @@ type StructValue struct{}
 // StructValueInterface for interfacing function
 type StructValueInterface interface {
 	SetDefaultValueStruct(str interface{})
+}
+
+// RebuildProperty properties rebuild of struct
+type RebuildProperty struct {
+	IgnoreFieldString []string
+	IgnoreFieldType   []reflect.Type
+	MoveToMember      []string
 }
 
 var sValue *StructValue
@@ -99,4 +107,95 @@ func (st *StructValue) SetNilValue(str interface{}) interface{} {
 	newValue = reflect.New(val.Type()).Interface()
 
 	return newValue
+}
+
+// RebuilToNewStruct for create new struct and ignore some fields
+func (st *StructValue) RebuilToNewStruct(str interface{}, props *RebuildProperty, withValue bool) (interface{}, error) {
+
+	typ := reflect.TypeOf(str)
+	val := reflect.ValueOf(str)
+
+	if str == nil {
+		return nil, fmt.Errorf("Nil struct")
+	}
+
+	if typ.Kind() != reflect.Ptr && typ.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("Not struct type")
+	}
+
+	if typ.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	var fieldName, finalName string
+	var fieldValue reflect.Value
+	var sf []reflect.StructField
+	var fs []string
+	fillStruct := make(map[string]reflect.Value)
+
+	general := GeneralUtilService()
+
+	for i := 0; i < val.NumField(); i++ {
+		fieldName = val.Type().Field(i).Name
+		fieldValue = val.Field(i)
+		finalName = fieldName
+
+		if ok, _ := general.InArray(fieldName, props.IgnoreFieldString); ok {
+			continue
+		}
+
+		if ok, _ := general.InArray(fieldValue.Type(), props.IgnoreFieldType); ok {
+			continue
+		}
+
+		if ok, _ := general.InArray(finalName, props.MoveToMember); ok &&
+			fieldValue.Kind() == reflect.Ptr || fieldValue.Kind() == reflect.Struct {
+
+			for j := 0; j < fieldValue.NumField(); j++ {
+				finalName = fieldValue.Type().Field(j).Name
+				subValue := fieldValue.Field(j)
+
+				if ok, _ := general.InArray(finalName, fs); ok {
+					finalName = fieldValue.Type().Field(j).Name + "_" + fieldName
+				}
+
+				sf = append(sf, reflect.StructField{
+					Name: finalName,
+					Type: fieldValue.Type().Field(j).Type,
+				})
+				fs = append(fs, finalName)
+				fillStruct[finalName] = subValue
+			}
+			continue
+		}
+
+		if ok, _ := general.InArray(finalName, fs); ok {
+			finalName = finalName + "_Duplicate_" + strconv.Itoa(i)
+		}
+
+		sf = append(sf, reflect.StructField{
+			Name: finalName,
+			Type: val.Type().Field(i).Type,
+		})
+
+		fs = append(fs, finalName)
+		fillStruct[finalName] = fieldValue
+	}
+
+	newStructField := reflect.StructOf(sf)
+	newOfStruct := reflect.New(newStructField).Elem()
+
+	if !withValue {
+		return newOfStruct.Interface(), nil
+	}
+
+	for k, v := range fillStruct {
+		if !reflect.DeepEqual(v.Interface(), reflect.Zero(v.Type()).Interface()) {
+			newOfStruct.FieldByName(k).Set(v)
+			continue
+		}
+	}
+
+	return newOfStruct.Interface(), nil
+
 }

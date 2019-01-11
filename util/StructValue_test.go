@@ -1,7 +1,10 @@
 package util
 
 import (
+	"reflect"
 	"testing"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -82,6 +85,57 @@ func TestFillDefaultStruct(t *testing.T) {
 
 		str := sInter.SetNilValue(newParams)
 		assert.Empty(t, str)
+
+	})
+
+	t.Run("Tes Run Rebuild struct failed with invalid params", func(t *testing.T) {
+		str, err := sInter.RebuilToNewStruct(nil, &RebuildProperty{}, false)
+		assert.Error(t, err)
+		assert.Empty(t, str)
+
+	})
+
+	t.Run("Tes Run Rebuild struct failed with not struct params", func(t *testing.T) {
+		str, err := sInter.RebuilToNewStruct("test", &RebuildProperty{}, false)
+		assert.Error(t, err)
+		assert.Empty(t, str)
+
+	})
+
+	t.Run("Tes Run Rebuild struct ecpected with struct params", func(t *testing.T) {
+
+		type ParentStructParams struct {
+			Email string
+		}
+		type NewParamStruct struct {
+			gorm.Model
+			ID      uint
+			Name    string
+			Age     string
+			Melotot string
+			Emails  []ParentStructParams
+		}
+
+		np := &NewParamStruct{
+			gorm.Model{ID: 1000},
+			9,
+			"Udin", "joss", "iyes", []ParentStructParams{ParentStructParams{"udin@gmail.com"}}}
+
+		var ignore []reflect.Type
+
+		ignore = append(ignore, reflect.TypeOf(&ParentStructParams{}))
+
+		// var newParamStruct
+		str, err := sInter.RebuilToNewStruct(
+			np,
+			&RebuildProperty{IgnoreFieldString: []string{"Melotot"},
+				IgnoreFieldType: ignore,
+				MoveToMember:    []string{"Model"},
+			},
+			true,
+		)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, str)
 
 	})
 }

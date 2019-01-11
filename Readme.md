@@ -42,6 +42,9 @@ because ceria is `LIGHT & warm`
 - Ceria using TDD (Test design driven)
 ```
 
+# Unit & Integration Test
+![Screenshot](ps-unit-integration-test.png)
+
 # Trusted Library use in Ceria Workspace
 ```
 Gorm (ORM)
