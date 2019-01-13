@@ -2,16 +2,17 @@
 
 # Beta Version 0.1.0
 
-full example <a href="https://github.com/zokypesch/example-ceria">here</a> with docker-compose for running environment
+full example <a href="https://github.com/zokypesch/example-ceria">https://github.com/zokypesch/example-ceria</a>
+with docker-compose for running environment, CD/CI with jenkins and kubernetes soon will be updated
 
+# Ceria architecture
 ![Screenshot](ceria_diagram.png)
-
-How long did it take to finish this from scratch ??? 3 days ??? 2 days ?? 1 days ?? 5 hours ???
 
 ![Screenshot](ERD.png)
 
-Don’t sad baby …..
-If you are using ceria you cant do it for 5 minutes
+How long did it take to finish this from scratch ??? 3 days ??? 2 days ?? 1 days ?? 5 hours ???
+
+# Ceria Wrapper can do this just for 5 minutes
 
 ```
 SAY no to killing my time …
@@ -29,7 +30,7 @@ because ceria is `LIGHT & warm`
 - Ceria Helper (Test Helper, Wrapper)
 - Docker (Environment)
 - Makefile (Short hands for running your apps)
-- Example (Example how to use)
+- Examples (Example how to use) <a href="https://github.com/zokypesch/example-ceria">https://github.com/zokypesch/example-ceria</a>
 ```
 
 # HOW ABOUT PERFORMANCE, QUALITY & Customize ??
