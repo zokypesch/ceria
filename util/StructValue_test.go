@@ -114,18 +114,20 @@ func TestFillDefaultStruct(t *testing.T) {
 			Age     string
 			Melotot string
 			Emails  []ParentStructParams
+			Test    string
 		}
 
 		np := &NewParamStruct{
-			gorm.Model{ID: 1000},
-			9,
-			"Udin", "joss", "iyes", []ParentStructParams{ParentStructParams{"udin@gmail.com"}}}
+			Model: gorm.Model{ID: 1000},
+			ID:    9,
+			Name:  "Udin", Age: "joss", Melotot: "iyes", Emails: []ParentStructParams{ParentStructParams{"udin@gmail.com"}}}
 
 		var ignore []reflect.Type
 
-		ignore = append(ignore, reflect.TypeOf(&ParentStructParams{}))
+		var newIgnoreType []ParentStructParams
 
-		// var newParamStruct
+		ignore = append(ignore, reflect.TypeOf(newIgnoreType))
+
 		str, err := sInter.RebuilToNewStruct(
 			np,
 			&RebuildProperty{IgnoreFieldString: []string{"Melotot"},
@@ -134,6 +136,7 @@ func TestFillDefaultStruct(t *testing.T) {
 			},
 			true,
 		)
+
 		assert.NoError(t, err)
 		assert.NotEmpty(t, str)
 
