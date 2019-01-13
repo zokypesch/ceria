@@ -16,7 +16,7 @@ CD/CI with jenkins and kubernetes soon will be updated !!!
 # Features
 ```
 1. API WRAPPER
-2. POSTGRES & ELASTIC REPLICATION
+2. POSTGRES & ELASTIC MIRRORING
 3. RabbitMQ Wrapper
 4. Redis Wrapper
 5. Struct Converter and Modification
@@ -70,17 +70,14 @@ because ceria is `LIGHT & warm`
 ```
 
 # Trusted Library use in Ceria Workspace
-```
-local library :
-
+`local library :`
 Ceria Core 
 Ceria Repository(Handler Management)
 Ceria Util (Utility)
 Ceria Helper (Http Helper)
 Ceria Wrapper
 
-external library :
-
+`external library :`
 Gorm (ORM) <a href="http://gorm.io">http://gorm.io</a>
 Gin (HTTP Framewrok) <a href="https://gin-gonic.github.io/gin/">https://gin-gonic.github.io/gin</a>
 GIN-JWT (JWT Auth) <a href="https://github.com/appleboy/gin-jwt">https://github.com/appleboy/gin-jwt</a>
