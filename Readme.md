@@ -1,6 +1,6 @@
 # Always Wasting time !!!
 
-#### Stable version 1.1.6 ####
+#### Stable version 1.2.0 ####
 
 # List of Contents
 * <a href="https://github.com/zokypesch/ceria#ceria-workspace-architecture"> Architecture </a>
