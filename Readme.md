@@ -27,6 +27,7 @@ CD/CI with jenkins and kubernetes soon will be updated !!!
 
 ![Screenshot](ERD.png)
 
+```
 Imagine you must 
 1. create database & tables,
 2. initial your project,
@@ -34,6 +35,7 @@ Imagine you must
 4. Create model,
 5. Create controllers
 6. Testing your api & many things
+```
 
 So .... How long did it take to finish this from scratch ??? 3 days ??? 2 days ?? 1 days ?? 5 hours ???
 
@@ -89,7 +91,6 @@ Ampq (Rabbit MQ) <a href="https://github.com/streadway/amqp">https://github.com/
 VIPER (Read Config File) <a href="github.com/spf13/viper">github.com/spf13/viper</a>
 Dep (Depedency tool vendor) <a href="https://github.com/golang/dep">https://github.com/golang/dep</a>
 Elastic (Elastic Library) <a href="github.com/olivere/elastic">github.com/olivere/elastic</a>
-```
 
 # How to it works ?
 ```
