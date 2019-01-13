@@ -143,7 +143,14 @@ func (st *StructValue) RebuilToNewStruct(str interface{}, props *RebuildProperty
 			continue
 		}
 
-		if ok, _ := general.InArray(reflect.Indirect(fieldValue).Type(), props.IgnoreFieldType); ok {
+		isZeroValue := reflect.DeepEqual(fieldValue.Interface(), reflect.Zero(fieldValue.Type()).Interface())
+		skipType := false
+
+		if !isZeroValue {
+			skipType, _ = general.InArray(reflect.Indirect(fieldValue).Type(), props.IgnoreFieldType)
+		}
+
+		if skipType {
 			continue
 		}
 
