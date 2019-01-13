@@ -203,15 +203,6 @@ func (repo *MasterRepository) Create(override interface{}) (int64, error) {
 
 	values = cvrt.ConvertStructToSingeMap(realModel)
 
-	// if _, ok := values["ID"]; !ok {
-	// 	return ID, cr.Error
-	// }
-
-	// modelData, _ := cvrt.ConvertInterfaceMaptoMap(values["Model"])
-	// if val, ok := modelData["ID"]; ok {
-	// 	ID, err = strconv.ParseInt(val, 0, 64)
-	// }
-
 	valOfID, ok := values["ID"]
 
 	if !ok {
@@ -226,15 +217,7 @@ func (repo *MasterRepository) Create(override interface{}) (int64, error) {
 
 	// create in elastic
 	if repo.WithElastic {
-
 		repo.coreElastic.MultipleinsertDocumentByStruct(valOfID.(string), realModel)
-
-		// util.NewUtilConvertToMap().SetFieldNullByTag(realModel) // setnull by tagging
-		// errElastic := repo.coreElastic.AddDocument(valOfID.(string), realModel)
-		// repo.coreElastic.AddDocument(valOfID.(string), realModel)
-		// if errElastic != nil {
-		// 	return ID, errElastic
-		// }
 	}
 
 	return ID, cr.Error
@@ -253,8 +236,6 @@ func (repo *MasterRepository) Update(condition map[string]interface{}, data map[
 
 	cr := repo.Conn.Model(newModel).Where(condition).Updates(data)
 
-	// var errSlice []error
-	// update in elastic to be continued
 	if repo.WithElastic && cr.Error == nil {
 		repo.Conn.Where(condition).Find(sliceModel)
 		valueSlice := reflect.ValueOf(sliceModel).Elem()
@@ -267,17 +248,12 @@ func (repo *MasterRepository) Update(condition map[string]interface{}, data map[
 			mdl := stValue.FieldByName("Model")
 			newValuePassing := st.Interface()
 
-			util.NewUtilConvertToMap().SetFieldNullByTag(newValuePassing) // setnull by tagging
+			repo.coreElastic.MultipleinsertDocumentByStruct(newUtil.ConvertDataToString(mdl.Field(0).Interface()), newValuePassing)
 
-			repo.coreElastic.EditDocument(newUtil.ConvertDataToString(mdl.Field(0).Interface()), newValuePassing)
-			// errElastic := repo.coreElastic.EditDocument(newUtil.ConvertDataToString(mdl.Field(0).Interface()), newValuePassing)
-			// errSlice = append(errSlice, errElastic)
+			// util.NewUtilConvertToMap().SetFieldNullByTag(newValuePassing) // setnull by tagging
+			// repo.coreElastic.EditDocument(newUtil.ConvertDataToString(mdl.Field(0).Interface()), newValuePassing)
 		}
 	}
-
-	// if len(errSlice) > 0 {
-	// 	return errSlice[0]
-	// }
 
 	return cr.Error
 }

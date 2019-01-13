@@ -1,20 +1,47 @@
 # Always Wasting time !!!
 
-# Beta Version 0.1.0
+# Stable version 1.1.6
 
 full example <a href="https://github.com/zokypesch/example-ceria">https://github.com/zokypesch/example-ceria</a>
-with docker-compose for running environment, CD/CI with jenkins and kubernetes soon will be updated
+with docker-compose for running environment in your local machine,
+CD/CI with jenkins and kubernetes soon will be updated !!!
 
-# Ceria architecture
+# Ceria workspace architecture
 ![Screenshot](ceria_diagram.png)
+
+
+# Unit & Integration Test
+![Screenshot](ps-unit-integration-test-c.png)
+
+# Features
+```
+1. API WRAPPER
+2. POSTGRES & ELASTIC REPLICATION
+3. RabbitMQ Wrapper
+4. Redis Wrapper
+5. Struct Converter and Modification
+6. Http Test Helper for integration test
+```
+
+# I have a case see below :
 
 ![Screenshot](ERD.png)
 
-How long did it take to finish this from scratch ??? 3 days ??? 2 days ?? 1 days ?? 5 hours ???
+Imagine you must 
+1. create database & tables,
+2. initial your project,
+3. Create router,
+4. Create model,
+5. Create controllers
+6. Testing your api & many things
 
-# Ceria Wrapper can do this just for 5 minutes
+So .... How long did it take to finish this from scratch ??? 3 days ??? 2 days ?? 1 days ?? 5 hours ???
+
+# Ceria API Wrapper can do this just for 5 minutes
 
 ```
+Just register your struct / model, and BOOOOMMM ! your api is already to consume
+
 SAY no to killing my time …
 "Speed development is a key success for your bussiness" `Maulana`
 ```
@@ -22,7 +49,7 @@ SAY no to killing my time …
 Why choose us
 because ceria is `LIGHT & warm`
 
-# Package
+# Package in example <a href="https://github.com/zokypesch/example-ceria">https://github.com/zokypesch/example-ceria</a>
 ```
 - Ceria Repository (Handler like CRUD API GATEWAY)
 - Ceria Core (DB Conn, Redis, RabbitMQ, Elastic)
@@ -42,34 +69,34 @@ because ceria is `LIGHT & warm`
 - Ceria using TDD (Test design driven)
 ```
 
-# Unit & Integration Test
-![Screenshot](ps-unit-integration-test-c.png)
-
 # Trusted Library use in Ceria Workspace
 ```
-Gorm (ORM)
-Gin (HTTP Framewrok)
-GIN-JWT (JWT Auth)
-Redisstore (Redis)
-Assert (Unit Testing)
-Go-playground (Validatior)
-Gorilla-Sessions (Manage Session)
-GO-Mocket(Mocking SQL for Gorm)
-Ampq (Rabbit MQ)
+local library :
 
-VIPER (Read Config File)
-Dep (Depedency tool vendor)
-Elastic (Elastic Library)
-Ceria Core
+Ceria Core 
 Ceria Repository(Handler Management)
 Ceria Util (Utility)
 Ceria Helper (Http Helper)
 Ceria Wrapper
+
+external library :
+
+Gorm (ORM) <a href="http://gorm.io">http://gorm.io</a>
+Gin (HTTP Framewrok) <a href="https://gin-gonic.github.io/gin/">https://gin-gonic.github.io/gin</a>
+GIN-JWT (JWT Auth) <a href="https://github.com/appleboy/gin-jwt">https://github.com/appleboy/gin-jwt</a>
+Redisstore (Redis) <a href="github.com/garyburd/redigo">github.com/garyburd/redigo</a>
+Assert (Unit Testing) <a href="https://github.com/stretchr/testify">https://github.com/stretchr/testify</a>
+Go-playground (Validatior) <a href="https://github.com/go-playground/validator">https://github.com/go-playground/validator</a>
+GO-Mocket(Mocking SQL for Gorm) <a href="https://github.com/Selvatico/go-mocket">https://github.com/Selvatico/go-mocket</a>
+Ampq (Rabbit MQ) <a href="https://github.com/streadway/amqp">https://github.com/streadway/amqp</a>
+VIPER (Read Config File) <a href="github.com/spf13/viper">github.com/spf13/viper</a>
+Dep (Depedency tool vendor) <a href="https://github.com/golang/dep">https://github.com/golang/dep</a>
+Elastic (Elastic Library) <a href="github.com/olivere/elastic">github.com/olivere/elastic</a>
 ```
 
 # How to it works ?
 ```
-clone or deownload example in https://github.com/zokypesch/example-ceria
+example project different repository, you can fin & clone or download example in https://github.com/zokypesch/example-ceria
 type "make help" in current folder example-ceria
 make init mode=development
 make install_docker

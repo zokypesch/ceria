@@ -129,10 +129,6 @@ func (st *StructValue) RebuilToNewStruct(str interface{}, props *RebuildProperty
 		sf                   []reflect.StructField
 		fs                   []string
 	)
-	// var fieldName, finalName string
-	// var fieldValue reflect.Value
-	// var sf []reflect.StructField
-	// var fs []string
 
 	fillStruct := make(map[string]reflect.Value)
 
