@@ -3,7 +3,7 @@
 #### Stable version 1.1.6 ####
 
 # List of Contents
-* <a href="https://github.com/zokypesch/ceria#ceria-workspace-architecture"> Architectur </a>
+* <a href="https://github.com/zokypesch/ceria#ceria-workspace-architecture"> Architecture </a>
 * <a href="https://github.com/zokypesch/ceria#unit--integration-test"> Unit & Integration Test </a>
 * <a href="https://github.com/zokypesch/ceria#features"> Features </a>
 * <a href="https://github.com/zokypesch/ceria#i-have-a-case-see-below-"> Study Case </a>
